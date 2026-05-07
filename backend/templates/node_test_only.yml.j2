@@ -1,0 +1,53 @@
+name: Node.js Tests
+
+on:
+{% if branch_trigger == "push" %}
+  push:
+    branches: [main, develop]
+{% elif branch_trigger == "pull_request" %}
+  pull_request:
+    branches: [main]
+{% else %}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+{% endif %}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js {{ version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: '{{ version }}'
+
+{% include 'cache_deps.yml.j2' %}
+
+    - name: Install dependencies
+      run: |
+{% if package_manager == "yarn" %}
+        yarn install --frozen-lockfile
+{% elif package_manager == "pnpm" %}
+        npm install -g pnpm
+        pnpm install --frozen-lockfile
+{% else %}
+        npm ci
+{% endif %}
+
+    - name: Run tests
+      run: {{ test_command }}
+
+{% if enable_deploy_sim %}
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Simulate deployment
+      run: echo "Deploying application..."
+{% endif %}

@@ -1,0 +1,43 @@
+name: Java Maven Tests
+
+on:
+{% if branch_trigger == "push" %}
+  push:
+    branches: [main, develop]
+{% elif branch_trigger == "pull_request" %}
+  pull_request:
+    branches: [main]
+{% else %}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+{% endif %}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK {{ version }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: '{{ version }}'
+        distribution: 'temurin'
+
+{% include 'cache_deps.yml.j2' %}
+
+    - name: Run tests
+      run: {{ test_command }}
+
+{% if enable_deploy_sim %}
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Simulate deployment
+      run: echo "Deploying application..."
+{% endif %}
