@@ -5,6 +5,7 @@ pydantic-settings==2.1.0
 python-dotenv==1.0.0
 PyGithub==2.1.1
 Jinja2==3.1.2
+PyYAML==6.0.1
 yamllint==1.33.0
 authlib==1.2.1
 httpx==0.25.2

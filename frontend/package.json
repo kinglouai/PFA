@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/lang-yaml": "^6.1.1",
+    "@uiw/react-codemirror": "^4.21.25",
     "axios": "^1.16.0",
+    "codemirror": "^6.0.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.15.0"
