@@ -17,7 +17,7 @@ import Spinner from '../components/ui/Spinner.jsx'
 
 export default function Result() {
   const { state, dispatch } = useWizard()
-  const { token, isAuthenticated } = useAuth()
+  const { token, isAuthenticated, getAuthUrl } = useAuth()
   const navigate = useNavigate()
 
   const [validation, setValidation] = useState(null)
@@ -88,7 +88,7 @@ export default function Result() {
   const handlePushToGitHub = async () => {
     if (!isAuthenticated) {
       // Redirect to GitHub OAuth flow
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/auth/github`
+      window.location.href = getAuthUrl()
       return
     }
 
@@ -97,7 +97,8 @@ export default function Result() {
     try {
       const result = await createPR(state.repoUrl, state.generatedYaml)
       if (result.success && result.data) {
-        dispatch({ type: 'SET_RUN_ID', payload: result.data.run_id })
+        dispatch({ type: 'SET_RUN_ID', payload: result.data.run_id || 'latest' })
+        dispatch({ type: 'SET_PR_URL', payload: result.data.pr_url })
         navigate('/status')
       }
     } catch (err) {

@@ -68,3 +68,18 @@ def get_run_status(token: str, repo_url: str, run_id: int) -> dict:
         "jobs": jobs_data,
         "html_url": run.html_url,
     }
+
+
+def get_latest_run_id_for_branch(token: str, repo_url: str, branch_name: str) -> int | None:
+    """Find the latest workflow run ID for the given branch."""
+    owner, repo_name = _parse_owner_repo(repo_url)
+    g = Github(token)
+    repo = g.get_repo(f"{owner}/{repo_name}")
+    try:
+        runs = repo.get_workflow_runs(branch=branch_name)
+        if runs.totalCount > 0:
+            return runs[0].id
+    except Exception:
+        pass
+    return None
+

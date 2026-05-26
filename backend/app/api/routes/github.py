@@ -11,7 +11,7 @@ from typing import Optional
 from app.api.deps import get_required_token
 from app.core.exceptions import AppException
 from app.github_client.repo_client import create_pr
-from app.github_client.poll_client import get_run_status
+from app.github_client.poll_client import get_run_status, get_latest_run_id_for_branch
 
 router = APIRouter(prefix="/github")
 
@@ -64,10 +64,21 @@ async def get_workflow_status(
     Returns partial results if the run is still in progress.
     """
     try:
+        if run_id.lower() == "latest":
+            resolved_run_id = get_latest_run_id_for_branch(token, repo_url, "ci/add-pipeline")
+            if not resolved_run_id:
+                return {
+                    "success": True,
+                    "message": "Waiting for workflow run to start...",
+                    "data": None,
+                }
+        else:
+            resolved_run_id = int(run_id)
+
         status = get_run_status(
             token=token,
             repo_url=repo_url,
-            run_id=int(run_id),
+            run_id=resolved_run_id,
         )
         return {
             "success": True,

@@ -31,16 +31,19 @@ def build_pipeline(profile: dict) -> dict:
     template = get_template(template_name)
     yaml_output = template.render(**variables)
 
+    # ── Ensure no trailing whitespace before appending ─────────────
+    yaml_output = yaml_output.rstrip() + "\n"
+
     # ── Append extra jobs if needed ──────────────────────────────────
     if "docker" in checks and profile.get("has_docker", False):
         docker_template = get_template("docker_build")
         docker_yaml = docker_template.render(**variables)
-        yaml_output += "\n\n" + docker_yaml
+        yaml_output += "\n" + docker_yaml.lstrip("\n").rstrip() + "\n"
 
     if "security" in checks:
         security_template = get_template("security_scan")
         security_yaml = security_template.render(**variables)
-        yaml_output += "\n\n" + security_yaml
+        yaml_output += "\n" + security_yaml.lstrip("\n").rstrip() + "\n"
 
     return {
         "yaml": yaml_output,

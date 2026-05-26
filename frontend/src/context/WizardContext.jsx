@@ -10,6 +10,8 @@ const initialState = {
   generatedYaml: null,
   templateUsed: null,
   repoUrl: '',
+  runId: null,
+  prUrl: null,
 }
 
 function wizardReducer(state, action) {
@@ -47,6 +49,16 @@ function wizardReducer(state, action) {
       return {
         ...state,
         currentStep: action.payload,
+      }
+    case 'SET_RUN_ID':
+      return {
+        ...state,
+        runId: action.payload,
+      }
+    case 'SET_PR_URL':
+      return {
+        ...state,
+        prUrl: action.payload,
       }
     case 'RESET':
       return initialState

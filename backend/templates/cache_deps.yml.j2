@@ -1,51 +1,48 @@
-# Dependency caching partial — included by other templates
 {% if enable_cache %}
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+{% if cache_key == "pip" -%}
 {% raw %}
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 {% endraw %}
-{% if cache_key == "pip" %}
+{% elif cache_key == "npm" -%}
 {% raw %}
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 {% endraw %}
-{% elif cache_key == "npm" %}
+{% elif cache_key == "yarn" -%}
 {% raw %}
-        path: ~/.npm
-        key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 {% endraw %}
-{% elif cache_key == "yarn" %}
+{% elif cache_key == "pnpm" -%}
 {% raw %}
-        path: .yarn/cache
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 {% endraw %}
-{% elif cache_key == "pnpm" %}
+{% elif cache_key == "maven" -%}
 {% raw %}
-        path: ~/.pnpm-store
-        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 {% endraw %}
-{% elif cache_key == "maven" %}
+{% elif cache_key == "gradle" -%}
 {% raw %}
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-{% endraw %}
-{% elif cache_key == "gradle" %}
-{% raw %}
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 {% endraw %}
 {% endif %}
 {% endif %}

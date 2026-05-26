@@ -1,3 +1,4 @@
+---
 name: Java Maven Tests
 
 on:
@@ -17,27 +18,27 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK {{ version }}
-      uses: actions/setup-java@v4
-      with:
-        java-version: '{{ version }}'
-        distribution: 'temurin'
+      - name: Set up JDK {{ version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: '{{ version }}'
+          distribution: 'temurin'
 
 {% include 'cache_deps.yml.j2' %}
-
-    - name: Run tests
-      run: {{ test_command }}
-
+      - name: Run tests
+        run: {{ test_command }}
 {% if enable_deploy_sim %}
+
   deploy:
     needs: [test]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-    - name: Simulate deployment
-      run: echo "Deploying application..."
+      - name: Simulate deployment
+        run: echo "Deploying application..."
 {% endif %}

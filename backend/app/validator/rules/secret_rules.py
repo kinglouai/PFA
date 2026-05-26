@@ -28,12 +28,18 @@ def _scan_dict(obj, results: list, path: str):
     """Recursively scan a dict/list for sensitive keys with literal values."""
     if isinstance(obj, dict):
         for key, value in obj.items():
-            current_path = f"{path}.{key}" if path else key
+            current_path = f"{path}.{key}" if path else str(key)
+
+            # Skip non-string keys (e.g. PyYAML parses 'on:' as boolean True)
+            if not isinstance(key, str):
+                _scan_dict(value, results, current_path)
+                continue
+
             key_lower = key.lower().replace("-", "_")
 
-            if key_lower in _SENSITIVE_KEYS and isinstance(value, str):
-                # Check if it's a proper secret reference
-                if not _SECRET_REF_PATTERN.search(value):
+            if key_lower in _SENSITIVE_KEYS:
+                # Only flag string values that aren't proper secret references
+                if isinstance(value, str) and not _SECRET_REF_PATTERN.search(value):
                     results.append({
                         "level": "error",
                         "rule_id": "no_hardcoded_secrets",

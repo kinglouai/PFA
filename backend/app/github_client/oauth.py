@@ -19,7 +19,7 @@ def get_authorization_url() -> str:
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
         "redirect_uri": settings.GITHUB_REDIRECT_URI,
-        "scope": "repo",
+        "scope": "repo workflow",
     }
     query = "&".join(f"{k}={v}" for k, v in params.items())
     return f"{GITHUB_AUTHORIZE_URL}?{query}"

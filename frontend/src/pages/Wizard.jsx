@@ -71,7 +71,7 @@ export default function Wizard() {
     const profile = {
       ...state.confirmedProfile,
       checks: selectedChecks,
-      branch_trigger: 'push',
+      branch_trigger: 'both',
     }
 
     try {

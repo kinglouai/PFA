@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # GitHub OAuth
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
-    GITHUB_REDIRECT_URI: str = "http://localhost:3000/auth/callback"
+    GITHUB_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/callback"
 
     # App secrets
     SECRET_KEY: str = "dev-secret-key"

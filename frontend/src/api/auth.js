@@ -1,17 +1,20 @@
 /**
- * Auth API layer — stubs for Week 5.
+ * Auth API layer — GitHub OAuth helpers.
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const TOKEN_KEY = 'gh_token'
 
+/**
+ * Get the URL to redirect users to for GitHub OAuth authorization.
+ */
 export function getAuthUrl() {
   return `${API_BASE_URL}/api/v1/auth/github`
 }
 
-export async function handleCallback() {
-  // Stub — will be implemented in Week 5
-}
-
+/**
+ * Clear the stored GitHub token.
+ */
 export function logout() {
-  localStorage.removeItem('github_token')
+  localStorage.removeItem(TOKEN_KEY)
 }
