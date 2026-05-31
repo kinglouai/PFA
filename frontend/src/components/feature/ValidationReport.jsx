@@ -9,20 +9,20 @@ export default function ValidationReport({ validation }) {
   const { valid, errors = [], warnings = [] } = validation
   const totalIssues = errors.length + warnings.length
 
-  // All clear state
+  // All clear state — no errors or warnings
   if (valid && totalIssues === 0) {
     return (
-      <div className="w-full rounded-xl bg-[var(--color-bg-card)] border border-green-500/20 p-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="w-full p-6">
+        <div className="flex flex-col items-center justify-center gap-3 text-center">
+          <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+            <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-green-400">Validation Passed</h4>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-              No issues found — your workflow is ready to go.
+            <h4 className="text-base font-semibold text-green-400">Your pipeline looks great! 🎉</h4>
+            <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+              No errors or warnings found — your workflow is ready to ship.
             </p>
           </div>
         </div>
@@ -31,7 +31,7 @@ export default function ValidationReport({ validation }) {
   }
 
   return (
-    <div className="w-full rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)] overflow-hidden">
+    <div className="w-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">

@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────────────────
+# CI/CD Workflow Generator — Docker Compose Override (Development)
+# Hot reload for both backend and frontend.
+# ─────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Backend (dev mode with hot reload) ────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+
+  # ── Frontend (Vite dev server with HMR) ───────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    # Override: use Vite dev server instead of nginx
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000

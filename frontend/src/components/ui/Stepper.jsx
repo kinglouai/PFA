@@ -5,7 +5,7 @@
  */
 export default function Stepper({ steps, currentStep }) {
   return (
-    <div className="flex items-center justify-center gap-0 w-full max-w-2xl mx-auto">
+    <div className="flex items-center justify-center gap-0 w-full max-w-4xl mx-auto px-10">
       {steps.map((label, index) => {
         const stepNumber = index + 1
         const isActive = stepNumber === currentStep

@@ -32,7 +32,8 @@ export function usePollStatus(runId, repoUrl) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.response?.data?.message || 'Failed to fetch status.')
+          // Use the human-readable message from the API layer
+          setError(err.message || 'Failed to fetch status.')
         }
       } finally {
         if (!cancelled) setLoading(false)

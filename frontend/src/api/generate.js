@@ -8,6 +8,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
  * @returns {Promise<object>} GeneratedPipeline data
  */
 export async function generatePipeline(profile) {
-  const response = await axios.post(`${API_BASE_URL}/api/v1/generate`, profile)
-  return response.data
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/v1/generate`, profile)
+    return response.data
+  } catch (err) {
+    const message = err.response?.data?.message || 'Failed to generate pipeline. Please try again.'
+    throw new Error(message)
+  }
 }

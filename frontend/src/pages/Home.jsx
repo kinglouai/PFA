@@ -9,14 +9,15 @@ export default function Home() {
     <PageWrapper>
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-20">
         {/* Hero section */}
-        <div className="text-center mb-12 animate-fade-in">
-          {/* Decorative badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            CI/CD Workflow Generator
-          </div>
+        <div className="text-center mb-12 animate-fade-in flex flex-col items-center">
+          {/* Logo image in place of badge */}
+          <img
+            src="/logo.png"
+            alt="PipelineGen"
+            className="h-50 w-auto object-contain mx-auto mb-3 animate-fade-in"
+          />
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-[var(--color-text-primary)] leading-tight mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-[var(--color-text-primary)] leading-tight mb-4 flex flex-col items-center">
             Generate CI/CD pipelines
             <br />
             <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
@@ -24,7 +25,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="text-lg text-[var(--color-text-secondary)] max-w-md mx-auto leading-relaxed">
+          <p className="text-lg text-[var(--color-text-secondary)] max-w-md mx-auto leading-relaxed flex flex-col items-center">
             Paste your GitHub repo URL and get a production-ready
             GitHub Actions workflow, tailored to your stack.
           </p>
@@ -34,7 +35,7 @@ export default function Home() {
         <RepoInput />
 
         {/* Supported badges */}
-        <div className="mt-16 flex items-center gap-6 text-[var(--color-text-muted)] animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="mt-16 flex items-center gap-6 text-[var(--color-text-muted)] animate-fade-in " style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center gap-2 text-xs">
             <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 text-xs">🐍</div>
             Python

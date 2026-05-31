@@ -30,21 +30,21 @@ def _parse_repo_url(repo_url: str) -> tuple[str, str]:
     return match.group(1), match.group(2)
 
 
-def _get_github_client() -> Github:
+def _get_github_client(token: Optional[str] = None) -> Github:
     """Create a PyGithub client, using token if available."""
-    token = settings.GITHUB_TOKEN
-    if token:
-        return Github(token)
+    auth_token = token or settings.GITHUB_TOKEN
+    if auth_token:
+        return Github(auth_token)
     return Github()
 
 
-def get_file_tree(repo_url: str) -> List[str]:
+def get_file_tree(repo_url: str, token: Optional[str] = None) -> List[str]:
     """
     Fetch the full file tree of a GitHub repo (default branch).
     Returns a flat list of file paths.
     """
     owner, repo_name = _parse_repo_url(repo_url)
-    g = _get_github_client()
+    g = _get_github_client(token)
 
     try:
         repo = g.get_repo(f"{owner}/{repo_name}")
@@ -62,13 +62,13 @@ def get_file_tree(repo_url: str) -> List[str]:
         )
 
 
-def read_file(repo_url: str, path: str) -> Optional[str]:
+def read_file(repo_url: str, path: str, token: Optional[str] = None) -> Optional[str]:
     """
     Read the contents of a single file from a GitHub repo.
     Returns None if the file is not found (does not raise).
     """
     owner, repo_name = _parse_repo_url(repo_url)
-    g = _get_github_client()
+    g = _get_github_client(token)
 
     try:
         repo = g.get_repo(f"{owner}/{repo_name}")

@@ -58,3 +58,13 @@ async def root():
         "message": "CI/CD Workflow Generator API is running.",
         "data": None,
     }
+
+
+@app.get("/api/v1/health")
+async def health_check():
+    """Health check endpoint for Docker Compose."""
+    return {
+        "success": True,
+        "message": "Healthy",
+        "data": None,
+    }

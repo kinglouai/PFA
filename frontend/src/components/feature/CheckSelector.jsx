@@ -1,10 +1,9 @@
 /**
- * CheckSelector — list of toggleable CI checks.
- * Shows each check as a card with label, description, and Toggle switch.
+ * CheckSelector — CI checks displayed as selectable tiles/cards.
+ * Clicking a tile highlights/selects it. Centered layout.
  */
 import { useState, useEffect } from 'react'
 import { CHECK_OPTIONS } from '../../utils/constants.js'
-import Toggle from '../ui/Toggle.jsx'
 import Button from '../ui/Button.jsx'
 
 export default function CheckSelector({ detectedStack, onGenerate, loading = false }) {
@@ -42,46 +41,51 @@ export default function CheckSelector({ detectedStack, onGenerate, loading = fal
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto animate-fade-in">
-      <div className="space-y-3">
-        {CHECK_OPTIONS.map((check) => (
-          <div
-            key={check.id}
-            className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer
-              ${selectedChecks.includes(check.id)
-                ? 'bg-indigo-500/5 border-indigo-500/30 shadow-sm shadow-indigo-500/5'
-                : 'bg-[var(--color-bg-card)] border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
-              }`}
-            onClick={() => toggleCheck(check.id)}
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-xl">{check.icon}</span>
+    <div className="w-full max-w-2xl mx-auto animate-fade-in text-center">
+      {/* Tile grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {CHECK_OPTIONS.map((check) => {
+          const selected = selectedChecks.includes(check.id)
+          return (
+            <button
+              key={check.id}
+              onClick={() => toggleCheck(check.id)}
+              className={`relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer bg-transparent text-center group
+                ${selected
+                  ? 'bg-indigo-500/10 border-indigo-500/50 shadow-lg shadow-indigo-500/10'
+                  : 'bg-[var(--color-bg-card)] border-[var(--color-border)] hover:border-[var(--color-border-hover)] hover:bg-[var(--color-bg-tertiary)]/30'
+                }`}
+            >
+              {/* Selected indicator */}
+              {selected && (
+                <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+
+              <span className="text-3xl">{check.icon}</span>
               <div>
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">
+                <p className={`text-sm font-semibold ${selected ? 'text-indigo-300' : 'text-[var(--color-text-primary)]'}`}>
                   {check.label}
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
                   {check.description}
                 </p>
               </div>
-            </div>
-
-            <Toggle
-              id={`toggle-${check.id}`}
-              checked={selectedChecks.includes(check.id)}
-              onChange={() => toggleCheck(check.id)}
-            />
-          </div>
-        ))}
+            </button>
+          )
+        })}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8"style={{ marginTop: '50px', marginBottom: '20px' }}>
         <Button
           id="generate-pipeline-btn"
           onClick={() => onGenerate(selectedChecks)}
           loading={loading}
           disabled={loading || selectedChecks.length === 0}
-          className="w-full"
+          className="w-full max-w-md mx-auto"
           size="lg"
         >
           {loading ? 'Generating...' : 'Generate pipeline →'}

@@ -2,11 +2,12 @@
 POST /api/v1/detect — Detect the tech stack of a GitHub repository.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 
 from app.core.exceptions import AppException
+from app.api.deps import get_optional_token
 from app.detector.stack_detector import detect_stack
 
 router = APIRouter()
@@ -29,13 +30,16 @@ class DetectedStack(BaseModel):
 
 
 @router.post("/detect")
-async def detect_repo(request: DetectRequest):
+async def detect_repo(
+    request: DetectRequest,
+    token: Optional[str] = Depends(get_optional_token),
+):
     """
     Accept a GitHub repo URL, detect the project stack,
     and return a DetectedStack response.
     """
     try:
-        result = detect_stack(request.repo_url)
+        result = detect_stack(request.repo_url, token)
         return {
             "success": True,
             "message": "Stack detected successfully.",

@@ -1,10 +1,12 @@
 /**
  * RepoInput — repo URL input + "Analyze" button.
  * Calls detect API and stores result in WizardContext.
+ * Shows loading spinner in button and friendly errors for 404/403.
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWizard } from '../../context/WizardContext.jsx'
+import { useAuth } from '../../hooks/useAuth.js'
 import { detectStack } from '../../api/detect.js'
 import Button from '../ui/Button.jsx'
 import Input from '../ui/Input.jsx'
@@ -14,6 +16,7 @@ export default function RepoInput() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { dispatch } = useWizard()
+  const { token } = useAuth()
   const navigate = useNavigate()
 
   const handleAnalyze = async () => {
@@ -32,7 +35,7 @@ export default function RepoInput() {
     setLoading(true)
 
     try {
-      const result = await detectStack(repoUrl.trim())
+      const result = await detectStack(repoUrl.trim(), token)
       if (result.success) {
         dispatch({ type: 'SET_REPO_URL', payload: repoUrl.trim() })
         dispatch({ type: 'SET_DETECTED_STACK', payload: result.data })
@@ -41,11 +44,8 @@ export default function RepoInput() {
         setError(result.message || 'Detection failed. Please try again.')
       }
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to analyze repository. Please check the URL and try again.'
-      setError(message)
+      // err.message now contains a human-readable message from the API layer
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -57,11 +57,14 @@ export default function RepoInput() {
     }
   }
 
+  // Determine if this is a "connect GitHub" suggestion
+  const isPrivateRepoError = error && (error.includes('private') || error.includes('403'))
+
   return (
-    <div className="w-full max-w-xl mx-auto animate-slide-up">
+    <div className="w-full max-w-3xl mx-auto animate-slide-up">
       {/* Input group */}
       <div className="relative">
-        <div className="flex gap-3">
+        <div className="flex gap-4 items-center">
           <div className="flex-1" onKeyDown={handleKeyDown}>
             <Input
               id="repo-url-input"
@@ -73,6 +76,7 @@ export default function RepoInput() {
               placeholder="https://github.com/user/repo"
               error={!!error}
               disabled={loading}
+              className="px-6 py-5 text-lg rounded-2xl"
             />
           </div>
           <Button
@@ -80,11 +84,12 @@ export default function RepoInput() {
             onClick={handleAnalyze}
             loading={loading}
             disabled={loading}
-            size="md"
+            size="lg"
+            className="px-8 py-5 text-lg rounded-2xl gap-3 flex-shrink-0"
           >
             {loading ? 'Analyzing...' : 'Analyze'}
             {!loading && (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             )}
@@ -95,7 +100,12 @@ export default function RepoInput() {
       {/* Error message */}
       {error && (
         <div className="mt-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
-          {error}
+          <p>{error}</p>
+          {isPrivateRepoError && (
+            <p className="mt-2 text-xs text-amber-400/80">
+              💡 Tip: Connect your GitHub account to access private repositories.
+            </p>
+          )}
         </div>
       )}
 
