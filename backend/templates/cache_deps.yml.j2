@@ -44,5 +44,52 @@
           restore-keys: |
             ${{ runner.os }}-gradle-
 {% endraw %}
+{% elif cache_key == "go" -%}
+{% raw %}
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+{% endraw %}
+{% elif cache_key == "cargo" -%}
+{% raw %}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+{% endraw %}
+{% elif cache_key == "composer" -%}
+{% raw %}
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+{% endraw %}
+{% elif cache_key == "bundler" -%}
+{% raw %}
+          path: vendor/bundle
+          key: ${{ runner.os }}-bundler-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-
+{% endraw %}
+{% elif cache_key == "nuget" -%}
+{% raw %}
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+{% endraw %}
+{% elif cache_key == "spm" -%}
+{% raw %}
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+{% endraw %}
 {% endif %}
 {% endif %}

@@ -138,3 +138,40 @@ class TestJavaProfileSnapshot:
     def test_template_used(self, java_profile):
         result = build_pipeline(java_profile)
         assert result["template_used"] == "java_maven_test"
+
+
+# ── Additional Profile Fixtures ────────────────────────────────────
+
+@pytest.fixture
+def go_profile():
+    """Go profile: gin, go test, no Docker."""
+    return {
+        "language": "go",
+        "version": "1.21",
+        "framework": "gin",
+        "test_framework": "go test",
+        "linter": None,
+        "has_docker": False,
+        "package_manager": "go modules",
+        "checks": ["test"],
+        "branch_trigger": "both",
+    }
+
+
+class TestGoProfileSnapshot:
+    """Verify Go profile generates expected YAML snapshot."""
+
+    def test_matches_snapshot(self, go_profile):
+        result = build_pipeline(go_profile)
+        generated = _normalize(result["yaml"])
+        expected = _normalize(_load_snapshot("go_profile.yml"))
+
+        assert generated == expected, (
+            f"Go profile YAML does not match snapshot.\n\n"
+            f"--- Expected ---\n{expected}\n\n"
+            f"--- Generated ---\n{generated}"
+        )
+
+    def test_template_used(self, go_profile):
+        result = build_pipeline(go_profile)
+        assert result["template_used"] == "go_test"

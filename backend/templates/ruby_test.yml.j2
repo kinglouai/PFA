@@ -1,0 +1,43 @@
+---
+name: Ruby Tests
+
+on:
+{% if branch_trigger == "push" %}
+  push:
+    branches: [main, develop]
+{% elif branch_trigger == "pull_request" %}
+  pull_request:
+    branches: [main]
+{% else %}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+{% endif %}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby {{ version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '{{ version }}'
+          bundler-cache: true
+
+      - name: Run tests
+        run: {{ test_command }}
+{% if enable_deploy_sim %}
+
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Simulate deployment
+        run: echo "Deploying application..."
+{% endif %}

@@ -52,10 +52,23 @@ def get_run_status(token: str, repo_url: str, run_id: int) -> dict:
     try:
         jobs = run.jobs()
         for job in jobs:
+            # Fetch individual steps for this job
+            steps_data = []
+            try:
+                for step in job.steps:
+                    steps_data.append({
+                        "name": step.name,
+                        "status": step.status,
+                        "conclusion": step.conclusion,
+                    })
+            except Exception:
+                pass
+
             jobs_data.append({
                 "name": job.name,
                 "status": job.status,
                 "conclusion": job.conclusion,
+                "steps": steps_data,
             })
     except (GithubException, Exception):
         # Jobs may not be available yet — return empty list

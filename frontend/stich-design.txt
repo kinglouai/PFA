@@ -1,0 +1,1427 @@
+<!-- Design System -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(51, 65, 85, 1);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+        .pipeline-accent {
+            width: 4px;
+            background: #6366f1;
+            border-radius: 4px 0 0 4px;
+        }
+        body {
+            background-color: #0f172a;
+            color: #dae2fd;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#00bd85",
+                      "on-surface": "#dae2fd",
+                      "on-secondary-fixed": "#002114",
+                      "primary-fixed": "#e1e0ff",
+                      "surface-container-lowest": "#060e20",
+                      "surface-container-highest": "#2d3449",
+                      "surface-dim": "#0b1326",
+                      "primary-container": "#8083ff",
+                      "on-secondary-container": "#00452e",
+                      "secondary-fixed": "#68fcbf",
+                      "tertiary-fixed": "#ffdcc5",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "on-surface-variant": "#c7c4d7",
+                      "outline": "#908fa0",
+                      "primary": "#c0c1ff",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#005137",
+                      "on-background": "#dae2fd",
+                      "surface-tint": "#c0c1ff",
+                      "surface": "#0b1326",
+                      "inverse-surface": "#dae2fd",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "surface-container-low": "#131b2e",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "on-tertiary": "#4f2500",
+                      "surface-container": "#171f33",
+                      "tertiary": "#ffb783",
+                      "outline-variant": "#464554",
+                      "on-error-container": "#ffdad6",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#45dfa4",
+                      "surface-container-high": "#222a3d",
+                      "on-tertiary-fixed": "#301400",
+                      "tertiary-container": "#d97721",
+                      "on-error": "#690005",
+                      "on-secondary": "#003825",
+                      "background": "#0b1326",
+                      "secondary": "#45dfa4",
+                      "inverse-on-surface": "#283044",
+                      "surface-variant": "#2d3449",
+                      "inverse-primary": "#494bd6",
+                      "error-container": "#93000a",
+                      "surface-bright": "#31394d",
+                      "on-primary": "#1000a9",
+                      "on-tertiary-container": "#452000",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-primary-container": "#0d0096"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "gutter": "1.5rem",
+                      "sm": "0.5rem",
+                      "xl": "2rem",
+                      "lg": "1.5rem",
+                      "margin": "2rem",
+                      "xs": "0.25rem",
+                      "md": "1rem"
+              },
+              "fontFamily": {
+                      "display-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "code-sm": ["JetBrains Mono"],
+                      "headline-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-caps": ["Inter"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "code-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col font-body-md text-body-md">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm flex justify-between items-center px-gutter py-md max-w-full">
+<div class="flex items-center gap-xl">
+<span class="font-headline-md text-headline-md font-bold text-primary">PipelineGen</span>
+<div class="hidden md:flex gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Docs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Templates</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Security</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex gap-sm mr-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all active:scale-95">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all active:scale-95">settings</button>
+</div>
+<button class="bg-primary text-on-primary font-bold px-lg py-sm rounded-lg hover:opacity-80 transition-all active:scale-95">
+                Connect GitHub
+            </button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant/20 shadow-lg flex flex-col p-md gap-base z-40 pt-24">
+<div class="flex items-center gap-md px-md mb-xl">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">rocket_launch</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface font-bold">Current Build</span>
+<span class="text-[10px] text-on-surface-variant opacity-60">v1.0.4-beta</span>
+</div>
+</div>
+<div class="flex flex-col gap-sm flex-grow">
+<!-- Active State: Repository -->
+<button class="bg-primary-container text-on-primary-container rounded-lg font-bold flex items-center gap-md px-md py-sm hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined">source</span>
+<span class="font-label-caps text-label-caps">Repository</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 rounded-lg flex items-center gap-md px-md py-sm hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-caps text-label-caps">Stack</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 rounded-lg flex items-center gap-md px-md py-sm hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined">settings_suggest</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 rounded-lg flex items-center gap-md px-md py-sm hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined">task_alt</span>
+<span class="font-label-caps text-label-caps">Result</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-sm border-t border-outline-variant/10 pt-md">
+<button class="text-on-surface-variant hover:text-on-surface flex items-center gap-md px-md py-xs text-sm">
+<span class="material-symbols-outlined text-sm">help</span>
+<span>Help</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface flex items-center gap-md px-md py-xs text-sm">
+<span class="material-symbols-outlined text-sm">terminal</span>
+<span>Logs</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-24 flex-grow p-xl flex items-center justify-center relative overflow-hidden">
+<!-- Ambient Background Effect -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+
+</div>
+<div class="w-full max-w-2xl z-10">
+<!-- Stepper Indicators -->
+<div class="flex justify-between items-center mb-xl px-xl">
+<div class="flex flex-col items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary ring-4 ring-primary/20 transition-all duration-500">
+<span class="font-bold">1</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary">Repository</span>
+</div>
+<div class="h-0.5 flex-grow bg-outline-variant/30 mx-base -translate-y-4"></div>
+<div class="flex flex-col items-center gap-sm opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="font-bold">2</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Stack</span>
+</div>
+<div class="h-0.5 flex-grow bg-outline-variant/30 mx-base -translate-y-4"></div>
+<div class="flex flex-col items-center gap-sm opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="font-bold">3</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Review</span>
+</div>
+</div>
+<!-- Repo Card -->
+<div class="glass-card rounded-xl p-xl flex relative group">
+<div class="pipeline-accent absolute left-0 top-0 h-full"></div>
+<div class="flex flex-col w-full gap-lg">
+<header class="flex flex-col gap-xs">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Connect Repository</h1>
+<p class="text-on-surface-variant font-body-md text-body-md">Provide your GitHub details to begin the automated pipeline generation process.</p>
+</header>
+<div class="space-y-lg">
+<!-- GitHub URL Input -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant px-xs">GitHub Repository URL</label>
+<div class="relative group/input">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline group-focus-within/input:text-primary transition-colors">link</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-md pl-12 pr-md font-code-sm text-code-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline/50" placeholder="https://github.com/username/repository" type="text"/>
+</div>
+<p class="text-[11px] text-outline px-xs">Public repositories are scanned instantly. For private repos, ensure GitHub integration is active.</p>
+</div>
+<!-- Target Branch Dropdown -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Target Branch</label>
+<div class="relative group/select">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline group-focus-within/select:text-primary transition-colors">account_tree</span>
+<select class="w-full appearance-none bg-surface-container-low border border-outline-variant rounded-lg py-md pl-12 pr-xl font-body-md text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all cursor-pointer">
+<option value="main">main</option>
+<option value="master">master</option>
+<option value="develop">develop</option>
+<option value="staging">staging</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<footer class="mt-xl flex justify-end">
+<button class="bg-primary text-on-primary font-bold px-xl py-md rounded-lg flex items-center gap-md hover:opacity-90 active:scale-95 transition-all">
+                            Next: Configure Stack
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+</div>
+</div>
+<!-- Decorative Visual Elements -->
+<div class="mt-lg flex justify-center items-center gap-md opacity-30">
+<div class="h-px w-16 bg-gradient-to-r from-transparent to-outline"></div>
+<span class="material-symbols-outlined text-sm">security</span>
+<span class="font-label-caps text-[10px] tracking-widest uppercase">Encrypted Connection</span>
+<div class="h-px w-16 bg-gradient-to-l from-transparent to-outline"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="relative w-full bottom-0 bg-surface-dim border-t border-outline-variant/10 flex justify-between items-center px-xl py-lg w-full mt-auto z-50">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-tighter">PipelineGen Engineering</span>
+<span class="text-on-surface-variant font-body-md text-body-md">© 2024 PipelineGen Engineering</span>
+<div class="flex gap-lg">
+<a class="text-outline hover:text-on-surface transition-opacity duration-300 font-body-md text-body-md" href="#">Privacy Policy</a>
+<a class="text-outline hover:text-on-surface transition-opacity duration-300 font-body-md text-body-md" href="#">Terms of Service</a>
+<a class="text-outline hover:text-on-surface transition-opacity duration-300 font-body-md text-body-md" href="#">Status</a>
+</div>
+</footer>
+<script>
+        // Simple Micro-interaction for the next button
+        document.querySelector('button.bg-primary').addEventListener('click', function(e) {
+            this.classList.add('scale-95');
+            setTimeout(() => this.classList.remove('scale-95'), 150);
+        });
+    </script>
+</body></html>
+
+<!-- Pipeline Generator - Repository Info -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PipelineGen - Stack Detection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#00bd85",
+                    "on-surface": "#dae2fd",
+                    "on-secondary-fixed": "#002114",
+                    "primary-fixed": "#e1e0ff",
+                    "surface-container-lowest": "#060e20",
+                    "surface-container-highest": "#2d3449",
+                    "surface-dim": "#0b1326",
+                    "primary-container": "#8083ff",
+                    "on-secondary-container": "#00452e",
+                    "secondary-fixed": "#68fcbf",
+                    "tertiary-fixed": "#ffdcc5",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "on-surface-variant": "#c7c4d7",
+                    "outline": "#908fa0",
+                    "primary": "#c0c1ff",
+                    "on-primary-fixed": "#07006c",
+                    "on-secondary-fixed-variant": "#005137",
+                    "on-background": "#dae2fd",
+                    "surface-tint": "#c0c1ff",
+                    "surface": "#0b1326",
+                    "inverse-surface": "#dae2fd",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "surface-container-low": "#131b2e",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "on-tertiary": "#4f2500",
+                    "surface-container": "#171f33",
+                    "tertiary": "#ffb783",
+                    "outline-variant": "#464554",
+                    "on-error-container": "#ffdad6",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#45dfa4",
+                    "surface-container-high": "#222a3d",
+                    "on-tertiary-fixed": "#301400",
+                    "tertiary-container": "#d97721",
+                    "on-error": "#690005",
+                    "on-secondary": "#003825",
+                    "background": "#0b1326",
+                    "secondary": "#45dfa4",
+                    "inverse-on-surface": "#283044",
+                    "surface-variant": "#2d3449",
+                    "inverse-primary": "#494bd6",
+                    "error-container": "#93000a",
+                    "surface-bright": "#31394d",
+                    "on-primary": "#1000a9",
+                    "on-tertiary-container": "#452000",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "on-primary-container": "#0d0096"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "gutter": "1.5rem",
+                    "sm": "0.5rem",
+                    "xl": "2rem",
+                    "lg": "1.5rem",
+                    "margin": "2rem",
+                    "xs": "0.25rem",
+                    "md": "1rem"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "code-sm": ["JetBrains Mono"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-caps": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "code-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0b1326; /* Deep Dark Mode */
+            color: #dae2fd;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .beveled-edge {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .step-active {
+            box-shadow: 0 0 15px -5px rgba(99, 102, 241, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131b2e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #464554;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen font-body-md overflow-x-hidden selection:bg-primary/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-xl border-b border-outline-variant/30 flex justify-between items-center px-gutter py-md max-w-full shadow-sm">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">PipelineGen</span>
+</div>
+<div class="hidden md:flex items-center gap-xl">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Docs</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Templates</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Security</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">settings</button>
+<button class="bg-primary-container text-on-primary-container px-md py-xs rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all text-body-md">Connect GitHub</button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant/20 flex flex-col p-md gap-base shadow-lg z-40 pt-24">
+<div class="mb-lg flex items-center gap-sm px-sm">
+<div class="w-8 h-8 rounded bg-secondary flex items-center justify-center text-on-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface uppercase tracking-widest">Current Build</p>
+<p class="text-[10px] text-outline">v1.0.4-beta</p>
+</div>
+</div>
+<nav class="flex flex-col gap-xs flex-grow">
+<div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">source</span>
+<span class="font-label-caps text-label-caps">Repository</span>
+</div>
+<div class="flex items-center gap-md px-md py-sm bg-primary-container text-on-primary-container rounded-lg font-bold shadow-sm ring-2 ring-primary/20">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-caps text-label-caps">Stack</span>
+</div>
+<div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-transform cursor-pointer">
+<span class="material-symbols-outlined">settings_suggest</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</div>
+<div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg hover:translate-x-1 transition-transform cursor-pointer opacity-50">
+<span class="material-symbols-outlined">task_alt</span>
+<span class="font-label-caps text-label-caps">Result</span>
+</div>
+</nav>
+<div class="mt-auto flex flex-col gap-xs border-t border-outline-variant/10 pt-md">
+<div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Help</span>
+</div>
+<div class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-60 pt-24 pb-12 px-gutter flex-grow flex flex-col items-center justify-center">
+<!-- Background Animation -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+
+</div>
+<div class="max-w-4xl w-full">
+<!-- Stepper -->
+<div class="flex items-center justify-center gap-xl mb-xl">
+<div class="flex flex-col items-center gap-xs">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center text-label-caps font-bold">1</div>
+<span class="text-label-caps text-on-surface-variant">Repo</span>
+</div>
+<div class="h-[2px] w-12 bg-secondary-container"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center text-body-lg font-bold ring-4 ring-primary/20 step-active scale-110">2</div>
+<span class="text-label-caps text-primary font-bold">Stack</span>
+</div>
+<div class="h-[2px] w-12 bg-outline-variant/30"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-outline flex items-center justify-center text-label-caps">3</div>
+<span class="text-label-caps text-outline">Build</span>
+</div>
+</div>
+<div class="text-center mb-xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-sm">Stack Detection Complete</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">We've analyzed your repository. Confirm the detected technologies or manually override them to customize your CI/CD pipeline generation.</p>
+</div>
+<!-- Stack Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg mb-xl">
+<!-- Python Tile -->
+<div class="glass-panel beveled-edge p-lg rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[32px]">code</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Python</h3>
+<p class="text-label-caps text-outline uppercase tracking-wider">Language Detected</p>
+</div>
+</div>
+<span class="bg-secondary/10 text-secondary px-sm py-xs rounded text-label-caps font-bold">94% CONFIDENCE</span>
+</div>
+<div class="mt-lg flex flex-wrap gap-sm">
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">FastAPI</span>
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">Pytest</span>
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">Pydantic</span>
+</div>
+</div>
+<!-- Node.js Tile -->
+<div class="glass-panel beveled-edge p-lg rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[32px]">javascript</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Node.js</h3>
+<p class="text-label-caps text-outline uppercase tracking-wider">Runtime Detected</p>
+</div>
+</div>
+<span class="bg-primary/10 text-primary px-sm py-xs rounded text-label-caps font-bold">DETECTION POSITIVE</span>
+</div>
+<div class="mt-lg flex flex-wrap gap-sm">
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">React</span>
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">TypeScript</span>
+<span class="bg-surface-variant/50 text-on-surface-variant px-sm py-xs rounded-full text-label-caps border border-outline-variant/30">Tailwind</span>
+</div>
+</div>
+</div>
+<!-- Overrides Panel -->
+<div class="glass-panel beveled-edge p-xl rounded-2xl mb-xl">
+<div class="flex items-center justify-between mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface">Configuration Overrides</h2>
+<span class="material-symbols-outlined text-outline">tune</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Dropdown 1 -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Framework</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg py-md px-md appearance-none focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all font-body-md text-on-surface cursor-pointer">
+<option>FastAPI (Detected)</option>
+<option>Flask</option>
+<option>Django</option>
+<option>Express</option>
+<option>Next.js</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline group-hover:text-primary transition-colors">expand_more</span>
+</div>
+</div>
+<!-- Dropdown 2 -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Linter</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg py-md px-md appearance-none focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all font-body-md text-on-surface cursor-pointer">
+<option>Ruff (Detected)</option>
+<option>Flake8</option>
+<option>Pylint</option>
+<option>ESLint</option>
+<option>None</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline group-hover:text-primary transition-colors">expand_more</span>
+</div>
+</div>
+<!-- Dropdown 3 -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Package Manager</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg py-md px-md appearance-none focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all font-body-md text-on-surface cursor-pointer">
+<option>Poetry (Detected)</option>
+<option>Pip</option>
+<option>Conda</option>
+<option>npm</option>
+<option>yarn</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-outline group-hover:text-primary transition-colors">expand_more</span>
+</div>
+</div>
+</div>
+<div class="mt-xl pt-lg border-t border-outline-variant/10 flex items-center gap-md">
+<div class="p-sm bg-secondary/10 rounded-full">
+<span class="material-symbols-outlined text-secondary text-[20px]">verified_user</span>
+</div>
+<p class="text-body-md text-outline">All settings are optimized for high-performance deployment. No immediate actions required.</p>
+</div>
+</div>
+<!-- Footer Action Bar -->
+<div class="flex items-center justify-between">
+<button class="flex items-center gap-sm px-xl py-md text-on-surface-variant hover:text-on-surface transition-colors font-bold group">
+<span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Back
+                </button>
+<div class="flex items-center gap-lg">
+<button class="bg-surface-variant/30 text-on-surface-variant border border-outline-variant/30 px-xl py-md rounded-xl hover:bg-surface-variant/50 transition-colors font-bold">
+                        Save Draft
+                    </button>
+<button class="bg-primary text-on-primary px-xl py-md rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-sm">
+                        Generate Pipeline
+                        <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="relative w-full bottom-0 bg-surface-dim border-t border-outline-variant/10 flex justify-between items-center px-xl py-lg w-full mt-auto">
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-primary tracking-[0.2em] uppercase">PipelineGen Engineering</span>
+<p class="text-outline text-[11px] font-body-md">© 2024 PipelineGen Engineering. All systems operational.</p>
+</div>
+<div class="flex items-center gap-xl">
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity duration-300" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity duration-300" href="#">Terms of Service</a>
+<div class="flex items-center gap-xs text-secondary">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<span class="font-label-caps text-label-caps">Status</span>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for tiles
+        document.querySelectorAll('.glass-panel').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>
+
+<!-- Pipeline Generator - Stack Detection -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PipelineGen - Result View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(51, 65, 85, 1);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+        .code-line-number {
+            color: #464554;
+            text-align: right;
+            padding-right: 1rem;
+            user-select: none;
+        }
+        .indigo-glow {
+            box-shadow: 0 0 15px -5px rgba(99, 102, 241, 0.6);
+        }
+        .step-active {
+            position: relative;
+        }
+        .step-active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #c0c1ff;
+            border-radius: 50%;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#00bd85",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-fixed": "#002114",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-highest": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#8083ff",
+                        "on-secondary-container": "#00452e",
+                        "secondary-fixed": "#68fcbf",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-surface-variant": "#c7c4d7",
+                        "outline": "#908fa0",
+                        "primary": "#c0c1ff",
+                        "on-primary-fixed": "#07006c",
+                        "on-secondary-fixed-variant": "#005137",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "surface": "#0b1326",
+                        "inverse-surface": "#dae2fd",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "surface-container-low": "#131b2e",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-tertiary": "#4f2500",
+                        "surface-container": "#171f33",
+                        "tertiary": "#ffb783",
+                        "outline-variant": "#464554",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#45dfa4",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-fixed": "#301400",
+                        "tertiary-container": "#d97721",
+                        "on-error": "#690005",
+                        "on-secondary": "#003825",
+                        "background": "#0b1326",
+                        "secondary": "#45dfa4",
+                        "inverse-on-surface": "#283044",
+                        "surface-variant": "#2d3449",
+                        "inverse-primary": "#494bd6",
+                        "error-container": "#93000a",
+                        "surface-bright": "#31394d",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-container": "#452000",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary-container": "#0d0096"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "gutter": "1.5rem",
+                        "sm": "0.5rem",
+                        "xl": "2rem",
+                        "lg": "1.5rem",
+                        "margin": "2rem",
+                        "xs": "0.25rem",
+                        "md": "1rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm flex justify-between items-center px-gutter py-md max-w-full">
+<div class="flex items-center gap-lg">
+<span class="font-headline-md text-headline-md font-bold text-primary">PipelineGen</span>
+<div class="hidden md:flex gap-md">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Docs</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Templates</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Security</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-sm mr-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">settings</span>
+</div>
+<button class="bg-primary-container text-on-primary-container px-md py-sm rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">
+                Connect GitHub
+            </button>
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu9pNp6Qw1F0yYrTMFDe1GuTXN-vb8XIU6mwfSu2sYwghyX3gxCf8DpwH0PZbBJyJlYdpIFh8sZHAI1ncqBWo41NNLOF4hatIGqf5hnpRvSHFp7Fc3ASFRLeGILwUWrEX9qII_ELXXoBWpYE5YCQieQh8T1_wFGoXsLwHGmM5JERO858TJ1FoyF6y-1LEdol78_Bu7EwNP5v-Oj4kzzXd0YLFOlnLvFyILnSu-4nRHoJ1fTbBYLCC7AI_Qp72yr3ZdN-6CvqTNR6Q"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant/20 shadow-lg flex flex-col p-md gap-base pt-24 hidden md:flex">
+<div class="mb-lg">
+<h3 class="font-headline-lg text-headline-lg text-on-surface">Current Build</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-60">v1.0.4-beta</p>
+</div>
+<div class="flex flex-col gap-xs flex-grow">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">source</span>
+<span class="font-label-caps text-label-caps">Repository</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-caps text-label-caps">Stack</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">settings_suggest</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container text-on-primary-container rounded-lg font-bold transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">task_alt</span>
+<span class="font-label-caps text-label-caps">Result</span>
+</a>
+</div>
+<button class="w-full bg-secondary-container text-on-secondary-container py-md rounded-xl font-bold mb-md hover:opacity-90 active:ring-2 ring-primary/20 transition-all">
+            New Pipeline
+        </button>
+<div class="flex flex-col gap-xs border-t border-outline-variant/10 pt-md">
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-caps text-label-caps">Help</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 rounded-lg" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-caps text-label-caps">Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow pt-24 md:pl-64 pb-20 px-gutter">
+<div class="max-w-7xl mx-auto">
+<!-- Stepper Progress -->
+<div class="flex justify-center mb-xl">
+<div class="flex items-center gap-md bg-surface-container/40 p-sm rounded-full border border-outline-variant/10">
+<div class="flex items-center gap-xs px-md py-xs rounded-full text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span class="font-label-caps text-label-caps">Source</span>
+</div>
+<div class="w-8 h-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-xs px-md py-xs rounded-full text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span class="font-label-caps text-label-caps">Environment</span>
+</div>
+<div class="w-8 h-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-xs px-md py-xs rounded-full text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span class="font-label-caps text-label-caps">Strategy</span>
+</div>
+<div class="w-8 h-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-xs px-md py-xs rounded-full bg-primary-container text-on-primary-container font-bold shadow-md">
+<span class="material-symbols-outlined text-sm">published_with_changes</span>
+<span class="font-label-caps text-label-caps">Review</span>
+</div>
+</div>
+</div>
+<!-- Split Editor & Validation Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg h-[calc(100vh-320px)] min-h-[500px]">
+<!-- YAML Editor Side -->
+<div class="lg:col-span-7 flex flex-col h-full">
+<div class="glass-panel rounded-t-xl flex items-center justify-between px-md py-sm border-b-0">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">description</span>
+<span class="font-code-sm text-code-sm text-on-surface">pipeline.yml</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">content_copy</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">download</span>
+</div>
+</div>
+<div class="glass-panel flex-grow rounded-b-xl overflow-hidden flex flex-col border-t-0">
+<div class="flex-grow overflow-auto p-md font-code-sm text-code-sm bg-surface-container-lowest/50 leading-relaxed">
+<div class="flex">
+<div class="code-line-number">1</div>
+<div class="text-secondary">version:</div>
+<div class="text-on-surface ml-2">'2.1'</div>
+</div>
+<div class="flex">
+<div class="code-line-number">2</div>
+<div class="text-secondary">jobs:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">3</div>
+<div class="text-on-surface ml-4">build-and-test:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">4</div>
+<div class="text-secondary ml-6">docker:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">5</div>
+<div class="text-on-surface ml-8">- image:</div>
+<div class="text-tertiary ml-2">cimg/node:18.12.1</div>
+</div>
+<div class="flex">
+<div class="code-line-number">6</div>
+<div class="text-secondary ml-6">steps:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">7</div>
+<div class="text-on-surface ml-8">- checkout</div>
+</div>
+<div class="flex">
+<div class="code-line-number">8</div>
+<div class="text-on-surface ml-8">- run:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">9</div>
+<div class="text-secondary ml-10">name:</div>
+<div class="text-tertiary ml-2">Install dependencies</div>
+</div>
+<div class="flex">
+<div class="code-line-number">10</div>
+<div class="text-secondary ml-10">command:</div>
+<div class="text-tertiary ml-2">npm install</div>
+</div>
+<div class="flex">
+<div class="code-line-number">11</div>
+<div class="text-on-surface ml-8">- run:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">12</div>
+<div class="text-secondary ml-10">name:</div>
+<div class="text-tertiary ml-2">Run tests</div>
+</div>
+<div class="flex">
+<div class="code-line-number">13</div>
+<div class="text-secondary ml-10">command:</div>
+<div class="text-tertiary ml-2">npm test --verbose</div>
+</div>
+<div class="flex">
+<div class="code-line-number">14</div>
+<div class="text-secondary">workflows:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">15</div>
+<div class="text-on-surface ml-4">main:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">16</div>
+<div class="text-secondary ml-6">jobs:</div>
+</div>
+<div class="flex">
+<div class="code-line-number">17</div>
+<div class="text-on-surface ml-8">- build-and-test</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Validation & CTA Side -->
+<div class="lg:col-span-5 flex flex-col gap-lg h-full">
+<!-- Validation Card -->
+<div class="glass-panel p-lg rounded-xl flex flex-col gap-md relative overflow-hidden">
+<!-- Success Accent Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary shadow-[0_0_10px_rgba(69,223,164,0.5)]"></div>
+<div class="flex items-center justify-between">
+<h4 class="font-headline-md text-headline-md text-on-surface">Validation Report</h4>
+<span class="flex items-center gap-xs px-sm py-1 bg-secondary/10 text-secondary rounded-full border border-secondary/20">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="font-label-caps text-label-caps">Verified</span>
+</span>
+</div>
+<div class="bg-secondary/5 border border-secondary/20 p-md rounded-lg flex items-start gap-md">
+<div class="p-sm bg-secondary/20 rounded-full text-secondary">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-bold">Pipeline syntax is valid</p>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80">All environment variables and job dependencies are correctly resolved for the 'main' branch.</p>
+</div>
+</div>
+<div class="space-y-sm mt-sm">
+<div class="flex justify-between items-center py-sm border-b border-outline-variant/10">
+<span class="font-body-md text-on-surface-variant">Structure Check</span>
+<span class="font-label-caps text-secondary">Passed</span>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-outline-variant/10">
+<span class="font-body-md text-on-surface-variant">Credential Mapping</span>
+<span class="font-label-caps text-secondary">Secured</span>
+</div>
+<div class="flex justify-between items-center py-sm">
+<span class="font-body-md text-on-surface-variant">Estimate Runtime</span>
+<span class="font-label-caps text-on-surface">~4m 20s</span>
+</div>
+</div>
+</div>
+<!-- CTA Section -->
+<div class="mt-auto glass-panel p-lg rounded-xl bg-surface-container-high/50 flex flex-col items-center text-center gap-lg">
+<div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container mb-sm">
+<span class="material-symbols-outlined text-4xl">rocket_launch</span>
+</div>
+<div>
+<h5 class="font-headline-md text-headline-md text-on-surface">Ready to Deploy</h5>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[300px] mx-auto mt-xs">
+                                Your configuration is optimized. Create a pull request to merge these changes into your repository.
+                            </p>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container py-md rounded-xl font-bold flex items-center justify-center gap-md indigo-glow hover:scale-[1.02] active:scale-95 transition-all group">
+<span class="material-symbols-outlined">merge_type</span>
+<span>Create Pull Request</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full py-md border border-outline-variant/30 rounded-xl font-bold text-on-surface-variant hover:border-primary/50 hover:text-primary transition-all">
+                            Save as Template
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="relative w-full bottom-0 bg-surface-dim border-t border-outline-variant/10 flex justify-between items-center px-xl py-lg mt-auto">
+<div class="flex items-center gap-md">
+<span class="font-label-caps text-label-caps text-primary">PipelineGen</span>
+<span class="text-on-surface-variant font-body-md text-body-md opacity-40">|</span>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 PipelineGen Engineering</p>
+</div>
+<div class="flex gap-lg">
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity duration-300" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity duration-300" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity duration-300 flex items-center gap-xs" href="#">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                Status
+            </a>
+</div>
+</footer>
+<!-- Background Decorative Element -->
+<div class="fixed top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
+<script>
+        // Micro-interaction for code lines
+        document.querySelectorAll('.flex-grow.overflow-auto > div').forEach(line => {
+            line.addEventListener('mouseenter', () => {
+                line.style.backgroundColor = 'rgba(255,255,255,0.03)';
+            });
+            line.addEventListener('mouseleave', () => {
+                line.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // Pulsing effect for the active step
+        const activeStep = document.querySelector('.bg-primary-container.shadow-md');
+        if(activeStep) {
+            setInterval(() => {
+                activeStep.classList.toggle('ring-4');
+                activeStep.classList.toggle('ring-primary/10');
+            }, 1000);
+        }
+    </script>
+</body></html>
+
+<!-- Pipeline Generator - Result -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .os-card.active {
+            border-color: #8083ff;
+            background: rgba(128, 131, 255, 0.1);
+        }
+        .toggle-checkbox:checked + .toggle-track {
+            background-color: #45dfa4;
+        }
+        .toggle-checkbox:checked + .toggle-track .toggle-thumb {
+            transform: translateX(1.25rem);
+        }
+        .step-line {
+            background: linear-gradient(90deg, #45dfa4 0%, #334155 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#00bd85",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-fixed": "#002114",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-highest": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#8083ff",
+                        "on-secondary-container": "#00452e",
+                        "secondary-fixed": "#68fcbf",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-surface-variant": "#c7c4d7",
+                        "outline": "#908fa0",
+                        "primary": "#c0c1ff",
+                        "on-primary-fixed": "#07006c",
+                        "on-secondary-fixed-variant": "#005137",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#c0c1ff",
+                        "surface": "#0b1326",
+                        "inverse-surface": "#dae2fd",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "surface-container-low": "#131b2e",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-tertiary": "#4f2500",
+                        "surface-container": "#171f33",
+                        "tertiary": "#ffb783",
+                        "outline-variant": "#464554",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#45dfa4",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-fixed": "#301400",
+                        "tertiary-container": "#d97721",
+                        "on-error": "#690005",
+                        "on-secondary": "#003825",
+                        "background": "#0b1326",
+                        "secondary": "#45dfa4",
+                        "inverse-on-surface": "#283044",
+                        "surface-variant": "#2d3449",
+                        "inverse-primary": "#494bd6",
+                        "error-container": "#93000a",
+                        "surface-bright": "#31394d",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-container": "#452000",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary-container": "#0d0096"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "gutter": "1.5rem",
+                        "sm": "0.5rem",
+                        "xl": "2rem",
+                        "lg": "1.5rem",
+                        "margin": "2rem",
+                        "xs": "0.25rem",
+                        "md": "1rem"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "code-sm": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "code-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col selection:bg-primary/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm flex justify-between items-center px-gutter py-md">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">PipelineGen</span>
+</div>
+<div class="hidden md:flex items-center gap-xl">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Docs</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Templates</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Security</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">settings</button>
+<button class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">
+                Connect GitHub
+            </button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-60 bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant/20 shadow-lg flex flex-col p-md gap-base hidden md:flex pt-24">
+<div class="mb-lg px-sm">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary">terminal</span>
+</div>
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface">Current Build</h3>
+<p class="text-[10px] text-on-surface-variant opacity-60">v1.0.4-beta</p>
+</div>
+</div>
+</div>
+<div class="space-y-sm">
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 hover:translate-x-1 transition-all rounded-lg font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">source</span> Repository
+            </a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 hover:translate-x-1 transition-all rounded-lg font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">layers</span> Stack
+            </a>
+<a class="flex items-center gap-md p-md bg-primary-container text-on-primary-container rounded-lg font-bold transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">settings_suggest</span> Settings
+            </a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant/50 hover:translate-x-1 transition-all rounded-lg font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">task_alt</span> Result
+            </a>
+</div>
+<button class="mt-xl mx-sm bg-secondary text-on-secondary px-md py-sm rounded-lg font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all text-xs uppercase tracking-wider">
+            New Pipeline
+        </button>
+<div class="mt-auto border-t border-outline-variant/10 pt-md space-y-sm">
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:translate-x-1 transition-transform font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">help</span> Help
+            </a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:translate-x-1 transition-transform font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">terminal</span> Logs
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-60 pt-24 pb-12 px-gutter flex flex-col items-center">
+<!-- Stepper -->
+<div class="w-full max-w-4xl mb-xl flex items-center justify-between px-md relative">
+<div class="absolute top-1/2 left-0 w-full h-[2px] bg-outline-variant/20 -z-10 -translate-y-1/2"></div>
+<div class="absolute top-1/2 left-0 w-1/2 h-[2px] step-line -z-10 -translate-y-1/2"></div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold ring-4 ring-background">1</div>
+<span class="font-label-caps text-label-caps text-secondary">Source</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold ring-4 ring-background">2</div>
+<span class="font-label-caps text-label-caps text-secondary">Environment</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-8 ring-primary-container/20 ring-offset-4 ring-offset-background">3</div>
+<span class="font-label-caps text-label-caps text-primary">Settings</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-background">4</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Deploy</span>
+</div>
+</div>
+<!-- Configuration Panel -->
+<div class="w-full max-w-3xl space-y-lg">
+<header class="text-center mb-xl">
+<h1 class="font-display-lg text-display-lg text-on-surface mb-xs">CI Configuration</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Fine-tune your build pipeline parameters and runtime environment.</p>
+</header>
+<!-- Settings Grid -->
+<div class="grid grid-cols-1 gap-lg">
+<!-- Toggles Section -->
+<div class="glass-panel rounded-xl p-xl flex flex-col gap-lg">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-sm">
+<span class="material-symbols-outlined">security</span>
+                        Automation Features
+                    </h2>
+<div class="space-y-md">
+<!-- Security Scanning -->
+<div class="flex items-center justify-between p-md bg-surface-variant/20 rounded-lg group hover:bg-surface-variant/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-body-lg font-semibold text-on-surface">Security Scanning</span>
+<span class="text-xs text-on-surface-variant">Scan for vulnerabilities and secrets in your codebase</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer toggle-checkbox" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 rounded-full transition-colors toggle-track">
+<div class="absolute top-[2px] left-[2px] bg-white border-none h-5 w-5 rounded-full transition-transform toggle-thumb shadow-md"></div>
+</div>
+</label>
+</div>
+<!-- Dependency Caching -->
+<div class="flex items-center justify-between p-md bg-surface-variant/20 rounded-lg group hover:bg-surface-variant/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-body-lg font-semibold text-on-surface">Dependency Caching</span>
+<span class="text-xs text-on-surface-variant">Speed up builds by caching node_modules and vendor files</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer toggle-checkbox" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 rounded-full transition-colors toggle-track">
+<div class="absolute top-[2px] left-[2px] bg-white border-none h-5 w-5 rounded-full transition-transform toggle-thumb shadow-md"></div>
+</div>
+</label>
+</div>
+<!-- Docker Build -->
+<div class="flex items-center justify-between p-md bg-surface-variant/20 rounded-lg group hover:bg-surface-variant/30 transition-colors">
+<div class="flex flex-col">
+<span class="font-body-lg font-semibold text-on-surface">Docker Build</span>
+<span class="text-xs text-on-surface-variant">Automatically containerize your application on success</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer toggle-checkbox" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 rounded-full transition-colors toggle-track">
+<div class="absolute top-[2px] left-[2px] bg-white border-none h-5 w-5 rounded-full transition-transform toggle-thumb shadow-md"></div>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Build Matrix Section -->
+<div class="glass-panel rounded-xl p-xl flex flex-col gap-lg">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-sm">
+<span class="material-symbols-outlined">grid_view</span>
+                        Build Matrix
+                    </h2>
+<div class="space-y-lg">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-md uppercase">Target Operating Systems</p>
+<div class="grid grid-cols-3 gap-md">
+<button class="os-card active border border-outline-variant/30 rounded-xl p-lg flex flex-col items-center gap-sm transition-all hover:border-primary">
+<span class="material-symbols-outlined text-4xl text-on-surface">terminal</span>
+<span class="font-bold">Ubuntu</span>
+</button>
+<button class="os-card border border-outline-variant/30 rounded-xl p-lg flex flex-col items-center gap-sm transition-all hover:border-primary">
+<span class="material-symbols-outlined text-4xl text-on-surface">grid_3x3</span>
+<span class="font-bold">Windows</span>
+</button>
+<button class="os-card border border-outline-variant/30 rounded-xl p-lg flex flex-col items-center gap-sm transition-all hover:border-primary">
+<span class="material-symbols-outlined text-4xl text-on-surface">computer</span>
+<span class="font-bold">macOS</span>
+</button>
+</div>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-sm uppercase">Runtime Versions</p>
+<div class="relative group">
+<input class="w-full bg-slate-800 border border-slate-700 rounded-lg p-md font-code-sm text-code-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant" placeholder="e.g., 18.x, 20.x, latest" type="text"/>
+<div class="absolute right-md top-1/2 -translate-y-1/2 flex gap-xs">
+<span class="px-sm py-xs bg-surface-variant/50 rounded text-[10px] text-on-surface-variant">CSV Support</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-between mt-xl">
+<button class="flex items-center gap-sm px-xl py-md text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+                    Back to Stack
+                </button>
+<button class="bg-primary px-xl py-md text-on-primary font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-md">
+                    Initialize Pipeline
+                    <span class="material-symbols-outlined">bolt</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="relative w-full bottom-0 bg-surface-dim border-t border-outline-variant/10 flex justify-between items-center px-xl py-lg w-full mt-auto">
+<span class="font-label-caps text-label-caps text-primary uppercase">PipelineGen Engineering</span>
+<div class="flex gap-xl">
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-outline hover:text-on-surface transition-opacity" href="#">Status</a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 PipelineGen Engineering</p>
+</footer>
+<script>
+        // Micro-interactions for OS selection
+        document.querySelectorAll('.os-card').forEach(card => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('active');
+            });
+        });
+
+        // Simple console feedback for toggle switches
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                const label = e.target.closest('div.flex').querySelector('span.font-semibold').innerText;
+                console.log(`${label} is now ${e.target.checked ? 'Enabled' : 'Disabled'}`);
+            });
+        });
+    </script>
+</body></html>

@@ -1,9 +1,9 @@
 /**
- * Result page — YAML preview + validation report + actions.
- * Reads generated YAML from WizardContext, validates on mount,
- * and provides download, copy, start over, and push to GitHub actions.
+ * Result page — Two-column Stitch AI layout.
+ * Left: YAML code editor (code-glass). Right: Validation report + CTA.
+ * Preserves all editing, re-validation, download, copy, and PR push logic.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWizard } from '../context/WizardContext.jsx'
 import { useAuth } from '../hooks/useAuth.js'
@@ -13,7 +13,6 @@ import PageWrapper from '../components/layout/PageWrapper.jsx'
 import Stepper from '../components/ui/Stepper.jsx'
 import YamlPreview from '../components/feature/YamlPreview.jsx'
 import ValidationReport from '../components/feature/ValidationReport.jsx'
-import Button from '../components/ui/Button.jsx'
 import Spinner from '../components/ui/Spinner.jsx'
 import { WIZARD_STEPS } from '../utils/constants.js'
 
@@ -27,6 +26,18 @@ export default function Result() {
   const [validationError, setValidationError] = useState(null)
   const [pushingPR, setPushingPR] = useState(false)
   const [prError, setPrError] = useState(null)
+
+  // ── Editable YAML state ──────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false)
+  const [draftYaml, setDraftYaml] = useState(null)
+  const [isStale, setIsStale] = useState(false)
+
+  // Initialize draftYaml from generated YAML
+  useEffect(() => {
+    if (state.generatedYaml) {
+      setDraftYaml(state.generatedYaml)
+    }
+  }, [state.generatedYaml])
 
   // Redirect if no generated YAML (user navigated directly to /result)
   useEffect(() => {
@@ -51,7 +62,6 @@ export default function Result() {
         }
       } catch (err) {
         if (!cancelled) {
-          // err.message now contains a human-readable message from the API layer
           setValidationError(err.message || 'Failed to validate YAML. Please try again.')
         }
       } finally {
@@ -71,8 +81,11 @@ export default function Result() {
     return null
   }
 
+  // The YAML content to use for download/PR (draft if editing, otherwise generated)
+  const activeYaml = draftYaml ?? state.generatedYaml
+
   const handleDownload = () => {
-    const blob = new Blob([state.generatedYaml], { type: 'text/yaml' })
+    const blob = new Blob([activeYaml], { type: 'text/yaml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -86,6 +99,38 @@ export default function Result() {
     navigate('/')
   }
 
+  // ── Edit mode handlers ───────────────────────────────────────────
+  const handleToggleEdit = () => {
+    setIsEditing((prev) => !prev)
+  }
+
+  const handleYamlChange = useCallback((newYaml) => {
+    setDraftYaml(newYaml)
+    // Mark validation as stale whenever YAML changes
+    if (newYaml !== state.generatedYaml) {
+      setIsStale(true)
+    }
+  }, [state.generatedYaml])
+
+  const handleResetToGenerated = () => {
+    setDraftYaml(state.generatedYaml)
+    setIsStale(false)
+  }
+
+  const handleRevalidate = async () => {
+    setValidating(true)
+    setValidationError(null)
+    try {
+      const result = await validateYaml(draftYaml)
+      setValidation(result.data)
+      setIsStale(false)
+    } catch (err) {
+      setValidationError(err.message || 'Failed to validate YAML. Please try again.')
+    } finally {
+      setValidating(false)
+    }
+  }
+
   const handlePushToGitHub = async () => {
     if (!isAuthenticated) {
       // Redirect to GitHub OAuth flow
@@ -96,123 +141,324 @@ export default function Result() {
     setPushingPR(true)
     setPrError(null)
     try {
-      const result = await createPR(state.repoUrl, state.generatedYaml)
+      const result = await createPR(state.repoUrl, activeYaml)
       if (result.success && result.data) {
         dispatch({ type: 'SET_RUN_ID', payload: result.data.run_id || 'latest' })
         dispatch({ type: 'SET_PR_URL', payload: result.data.pr_url })
         navigate('/status')
       }
     } catch (err) {
-      // err.message now contains a human-readable message from the API layer
       setPrError(err.message || 'Failed to create PR. Please try again.')
     } finally {
       setPushingPR(false)
     }
   }
 
+  // Has draft diverged from last saved/validated state?
+  const hasUnsavedChanges = isEditing && draftYaml !== state.generatedYaml
+
   return (
     <PageWrapper>
-      <div className="w-full flex justify-center py-8">
-        <div className="w-full max-w-4xl px-6 flex flex-col">
-          {/* Progress bar — centered, step 4 active */}
-          <div className="mb-10">
-            <Stepper steps={WIZARD_STEPS} currentStep={4} />
-          </div>
+      {/* Ambient glow effects */}
+      <div className="ambient-glow-left"></div>
+      <div className="ambient-glow-right"></div>
 
-        {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h2 className="text-2xl font-bold text-[var(--color-text-primary)] "style={{ textAlign: 'center', marginTop: '20px'}}>
-            Your CI/CD Pipeline
-          </h2>
-          <p className="text-sm text-[var(--color-text-secondary)] mt-2 grid place-items-center w-full">
-            Template used: <span className="text-indigo-400 font-mono">{state.templateUsed}</span>
-          </p>
+      <main style={{
+        flexGrow: 1,
+        paddingTop: '104px',
+        paddingBottom: '48px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        maxWidth: '1440px',
+        margin: '0 auto',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '48px',
+      }}>
+        {/* Stepper */}
+        <div style={{ maxWidth: '56rem', margin: '0 auto', width: '100%' }}>
+          <Stepper steps={WIZARD_STEPS} currentStep={4} />
         </div>
 
-        {/* YAML Preview (includes built-in copy button) */}
-        <div className="w-full mb-6 animate-slide-up">
-          <YamlPreview yaml={state.generatedYaml} />
-        </div>
+        {/* Edit controls bar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          gap: '12px', maxWidth: '1440px', width: '100%',
+        }}>
+          <button
+            id="toggle-edit-yaml-btn"
+            onClick={handleToggleEdit}
+            style={{
+              padding: '6px 16px', borderRadius: '8px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', fontWeight: 500,
+              cursor: 'pointer', transition: 'all 0.3s ease',
+              ...(isEditing
+                ? {
+                    backgroundColor: 'rgba(255, 178, 41, 0.1)',
+                    border: '1px solid rgba(255, 178, 41, 0.3)',
+                    color: '#ffb229',
+                  }
+                : {
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#bbc9cf',
+                  }
+              ),
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+              {isEditing ? 'visibility' : 'edit'}
+            </span>
+            {isEditing ? 'View Only' : 'Edit YAML'}
+          </button>
 
-        {/* Validation Report */}
-        <div className="mb-6 animate-slide-up" style={{ animationDelay: '0.1s' ,marginBottom: '20px'}}>
-          {validating ? (
-            <div className="w-full ">
-              <div className="flex items-center justify-center gap-3">
-                <Spinner size="sm" />
-                <span className="text-sm text-[var(--color-text-secondary)]">
-                  Running validation checks…
-                </span>
-              </div>
-            </div>
-          ) : validationError ? (
-            <div className="w-full ">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-red-400">Validation Failed</h4>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{validationError}</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <ValidationReport validation={validation} />
+          {isEditing && (
+            <>
+              <button
+                id="revalidate-yaml-btn"
+                onClick={handleRevalidate}
+                disabled={validating || !isStale}
+                style={{
+                  padding: '6px 16px', borderRadius: '8px',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', fontWeight: 500,
+                  cursor: validating || !isStale ? 'not-allowed' : 'pointer',
+                  opacity: validating || !isStale ? 0.4 : 1,
+                  transition: 'all 0.3s ease',
+                  backgroundColor: 'rgba(0, 210, 255, 0.1)',
+                  border: '1px solid rgba(0, 210, 255, 0.3)',
+                  color: '#00d2ff',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>sync</span>
+                {validating ? 'Validating...' : 'Re-validate'}
+              </button>
+              <button
+                id="reset-yaml-btn"
+                onClick={handleResetToGenerated}
+                disabled={!hasUnsavedChanges}
+                style={{
+                  padding: '6px 16px', borderRadius: '8px',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', fontWeight: 500,
+                  cursor: hasUnsavedChanges ? 'pointer' : 'not-allowed',
+                  opacity: hasUnsavedChanges ? 1 : 0.4,
+                  transition: 'all 0.3s ease',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#bbc9cf',
+                }}
+              >
+                Reset to generated
+              </button>
+            </>
           )}
         </div>
 
-        {/* PR Error */}
-        {prError && (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400 animate-fade-in">
-            {prError}
+        {/* Unsaved changes indicator */}
+        {hasUnsavedChanges && (
+          <div className="animate-fade-in" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 16px', borderRadius: '8px',
+            background: 'linear-gradient(to right, rgba(255,178,41,0.1), transparent)',
+            border: '1px solid rgba(255, 178, 41, 0.2)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#ffb229' }}>edit_note</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: '#ffb229' }}>
+                You have unsaved YAML changes
+              </span>
+            </div>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: 'rgba(255,178,41,0.7)' }}>
+              Re-validate to ensure pipeline integrity before pushing
+            </span>
           </div>
         )}
 
-        {/* Actions — larger, centered buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full animate-fade-in" style={{ animationDelay: '0.2s', marginBottom: '20px'}}>
-          <Button
-            id="download-yaml-btn"
-            onClick={handleDownload}
-            variant="primary"
-            size="lg"
-            className="w-full"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            Download YAML
-          </Button>
+        {/* Two Column Layout */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '24px',
+          width: '100%',
+          minHeight: '500px',
+        }}>
+          {/* Left Column: Code Editor */}
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <YamlPreview
+              yaml={activeYaml}
+              editable={isEditing}
+              onChange={handleYamlChange}
+            />
+          </div>
 
-          <Button
-            id="create-pr-btn"
-            variant="secondary"
-            size="lg"
-            onClick={handlePushToGitHub}
-            loading={pushingPR}
-            disabled={!state.repoUrl}
-            className="w-full"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            {isAuthenticated ? 'Push to GitHub' : 'Connect GitHub to Push'}
-          </Button>
+          {/* Right Column: Validation & Actions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Validation Report */}
+            {validating ? (
+              <div className="glass-panel" style={{
+                borderRadius: '12px', padding: '24px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+              }}>
+                <Spinner size="sm" />
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#bbc9cf' }}>
+                  Running validation checks…
+                </span>
+              </div>
+            ) : validationError ? (
+              <div className="glass-panel" style={{
+                borderRadius: '12px', padding: '24px', overflow: 'hidden', position: 'relative',
+              }}>
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, width: '100%', height: '3px',
+                  background: 'linear-gradient(to right, rgba(239,68,68,0.5), rgba(255,178,41,0.5))',
+                  opacity: 0.5,
+                }} />
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{
+                    width: '32px', height: '32px', borderRadius: '9999px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, border: '1px solid rgba(239, 68, 68, 0.2)',
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#f87171' }}>error</span>
+                  </div>
+                  <div>
+                    <h4 style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: '#f87171' }}>
+                      Validation Failed
+                    </h4>
+                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: '#bbc9cf', marginTop: '4px' }}>
+                      {validationError}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <ValidationReport validation={validation} stale={isStale} />
+            )}
 
-          <Button
-            id="start-over-btn"
-            variant="ghost"
-            size="lg"
-            onClick={handleStartOver}
-            className="w-full"
-          >
-            ← Start Over
-          </Button>
+            {/* PR Error */}
+            {prError && (
+              <div className="animate-fade-in" style={{
+                padding: '12px 16px', borderRadius: '8px',
+                backgroundColor: 'rgba(147, 0, 10, 0.15)',
+                border: '1px solid rgba(255, 180, 171, 0.2)',
+                color: '#ffb4ab',
+                fontFamily: 'Inter, sans-serif', fontSize: '14px',
+              }}>
+                {prError}
+              </div>
+            )}
+
+            {/* Call to Action Card */}
+            <div className="glass-panel" style={{
+              borderRadius: '12px', padding: '24px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              textAlign: 'center', gap: '16px', overflow: 'hidden', position: 'relative',
+              marginTop: 'auto',
+            }}>
+              {/* Rocket icon */}
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '9999px',
+                backgroundColor: 'rgba(110, 32, 140, 0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid rgba(237, 177, 255, 0.2)',
+                boxShadow: '0 0 30px rgba(110, 32, 140, 0.3)',
+                marginBottom: '8px',
+              }}>
+                <span className="material-symbols-outlined" style={{
+                  fontSize: '32px', color: '#edb1ff',
+                  fontVariationSettings: "'FILL' 1",
+                }}>rocket_launch</span>
+              </div>
+
+              <h2 style={{
+                fontFamily: 'Geist, Inter, sans-serif', fontSize: '24px',
+                fontWeight: 600, lineHeight: 1.2, color: '#dde3e7', marginBottom: '4px',
+              }}>
+                Ready to Deploy
+              </h2>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                color: '#bbc9cf', maxWidth: '280px', marginBottom: '16px', opacity: 0.8,
+              }}>
+                Your configuration is optimized. Create a pull request to merge these changes into your repository.
+              </p>
+
+              {/* Create Pull Request */}
+              <button
+                id="create-pr-btn"
+                onClick={handlePushToGitHub}
+                disabled={pushingPR || !state.repoUrl || isStale}
+                style={{
+                  width: '100%', padding: '12px 24px', borderRadius: '8px',
+                  background: 'linear-gradient(to right, #00d2ff, #6e208c)',
+                  color: '#003543', border: 'none',
+                  fontFamily: 'Inter, sans-serif', fontSize: '16px', fontWeight: 600,
+                  cursor: (pushingPR || !state.repoUrl || isStale) ? 'not-allowed' : 'pointer',
+                  opacity: (pushingPR || !state.repoUrl || isStale) ? 0.5 : 1,
+                  transition: 'all 0.3s ease',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: '0 0 15px rgba(0, 210, 255, 0.2)',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>call_split</span>
+                {pushingPR ? 'Creating PR...' : isAuthenticated ? 'Create Pull Request' : 'Connect GitHub to Push'}
+                {!pushingPR && (
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', marginLeft: 'auto' }}>arrow_forward</span>
+                )}
+                {pushingPR && (
+                  <svg style={{ width: '20px', height: '20px', animation: 'spin 1s linear infinite', marginLeft: 'auto' }} fill="none" viewBox="0 0 24 24">
+                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+              </button>
+
+              {/* Download */}
+              <button
+                id="download-yaml-btn"
+                onClick={handleDownload}
+                style={{
+                  width: '100%', padding: '8px 24px', borderRadius: '8px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#dde3e7',
+                  fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500,
+                  cursor: 'pointer', transition: 'all 0.3s ease',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#00d2ff'; e.currentTarget.style.color = '#00d2ff' }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#dde3e7' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
+                Download YAML
+              </button>
+
+              {/* Start Over */}
+              <button
+                id="start-over-btn"
+                onClick={handleStartOver}
+                style={{
+                  backgroundColor: 'transparent', border: 'none',
+                  color: '#bbc9cf', cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500,
+                  transition: 'color 0.3s',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '4px 0',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#00d2ff'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#bbc9cf'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
+                Start Over
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </PageWrapper>
-)
+      </main>
+    </PageWrapper>
+  )
 }

@@ -1,59 +1,70 @@
 /**
- * Status page — live pipeline run status display.
+ * Status page — Stitch AI styled pipeline run status display.
+ * Glass-panel jobs table, terminal log view, success/failure banner,
+ * and "View on GitHub" + "Start Over" actions.
  * Polls the workflow run status every 5 seconds via usePollStatus.
- * Shows overall conclusion banner when completed.
- * Shows "No active run found" if run_id is missing from WizardContext.
- * Shows "Run not found" if the API returns 404.
- * Single "View on GitHub" button — no duplicates.
  */
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useWizard } from '../context/WizardContext.jsx'
 import { usePollStatus } from '../hooks/usePollStatus.js'
 import PageWrapper from '../components/layout/PageWrapper.jsx'
 import Stepper from '../components/ui/Stepper.jsx'
 import StatusTracker from '../components/feature/StatusTracker.jsx'
+import TerminalOutput from '../components/feature/TerminalOutput.jsx'
 import Spinner from '../components/ui/Spinner.jsx'
-import Button from '../components/ui/Button.jsx'
 import { WIZARD_STEPS } from '../utils/constants.js'
 
-const CONCLUSION_BANNER = {
-  success: {
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    color: 'text-green-400',
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    label: 'Pipeline Succeeded',
-    message: 'All jobs completed successfully. Your workflow is ready!',
-  },
-  failure: {
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
-    color: 'text-red-400',
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-      </svg>
-    ),
-    label: 'Pipeline Failed',
-    message: 'One or more jobs failed. Check the logs on GitHub for details.',
-  },
-  cancelled: {
-    bg: 'bg-gray-500/10',
-    border: 'border-gray-500/20',
-    color: 'text-gray-400',
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-      </svg>
-    ),
-    label: 'Pipeline Cancelled',
-    message: 'The workflow run was cancelled.',
-  },
+/**
+ * Generate terminal log lines from jobs/steps data.
+ */
+function buildLogLines(jobs) {
+  if (!jobs || jobs.length === 0) return []
+  const lines = []
+
+  lines.push({ text: '[pipeline-gen] Initializing CI/CD pipeline run...', type: 'dim' })
+  lines.push({ text: '' })
+
+  jobs.forEach((job) => {
+    const conclusionLabel = job.conclusion === 'success' ? '✓' : job.conclusion === 'failure' ? '✗' : '⏳'
+    const type = job.conclusion === 'success' ? 'info' : job.conclusion === 'failure' ? 'error' : 'dim'
+    lines.push({ text: `▸ Job: ${job.name}`, type: 'info' })
+
+    const steps = job.steps && job.steps.length > 0 ? job.steps : []
+    steps.forEach((step) => {
+      if (step.status === 'completed') {
+        if (step.conclusion === 'success') {
+          lines.push({ text: `  ${conclusionLabel} ${step.name}`, type: step.name.toLowerCase().includes('test') ? 'success' : undefined })
+        } else if (step.conclusion === 'failure') {
+          lines.push({ text: `  ✗ ${step.name}`, type: 'error' })
+        } else {
+          lines.push({ text: `  ○ ${step.name}`, type: 'dim' })
+        }
+      } else if (step.status === 'in_progress') {
+        lines.push({ text: `  ⟳ ${step.name} (running...)`, type: 'info' })
+      } else {
+        lines.push({ text: `  ○ ${step.name} (queued)`, type: 'dim' })
+      }
+    })
+
+    lines.push({ text: '' })
+  })
+
+  // Summary line
+  const passed = jobs.filter(j => j.conclusion === 'success').length
+  const failed = jobs.filter(j => j.conclusion === 'failure').length
+  const total = jobs.length
+
+  if (jobs.every(j => j.status === 'completed')) {
+    lines.push({ text: `Jobs: ${passed} passed, ${failed} failed, ${total} total`, type: passed === total ? 'success' : 'error' })
+    if (passed === total) {
+      lines.push({ text: 'All jobs completed successfully.', type: 'success' })
+    }
+  } else {
+    lines.push({ text: `Jobs: ${passed} passed, ${total - passed} pending`, type: 'dim' })
+  }
+
+  return lines
 }
 
 export default function Status() {
@@ -65,24 +76,52 @@ export default function Status() {
   if (!state.runId && !state.prUrl) {
     return (
       <PageWrapper>
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 animate-fade-in">
-          <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-8 max-w-md text-center shadow-lg">
-            <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
+        <div className="ambient-glow-left"></div>
+        <div className="ambient-glow-right"></div>
+        <div style={{
+          flexGrow: 1, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          padding: '80px 24px',
+        }}>
+          <div className="glass-panel" style={{
+            borderRadius: '12px', padding: '32px', maxWidth: '448px',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '9999px',
+              backgroundColor: 'rgba(255, 178, 41, 0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '28px', color: '#ffb229' }}>warning</span>
             </div>
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">
+            <h3 style={{
+              fontFamily: 'Geist, Inter, sans-serif', fontSize: '20px',
+              fontWeight: 600, color: '#dde3e7', marginBottom: '8px',
+            }}>
               No Active Run Found
             </h3>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-6">
+            <p style={{
+              fontFamily: 'Inter, sans-serif', fontSize: '14px',
+              color: '#bbc9cf', marginBottom: '24px', lineHeight: 1.5,
+            }}>
               There is no active pipeline run to track. Generate a workflow and push it to GitHub first.
             </p>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 font-medium transition-colors shadow-lg shadow-indigo-500/20 text-sm cursor-pointer"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '8px 20px', borderRadius: '8px',
+                background: 'linear-gradient(135deg, #00d2ff 0%, #6e208c 100%)',
+                color: '#003543', fontFamily: 'Inter, sans-serif',
+                fontSize: '14px', fontWeight: 600,
+                textDecoration: 'none', cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 0 15px rgba(0, 210, 255, 0.2)',
+              }}
             >
-              ← Back to Home
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_back</span>
+              Back to Home
             </Link>
           </div>
         </div>
@@ -90,8 +129,6 @@ export default function Status() {
     )
   }
 
-  const conclusionBanner = status?.conclusion ? CONCLUSION_BANNER[status.conclusion] : null
-  // Determine the single "View on GitHub" URL — prefer the run html_url, fall back to PR url
   const viewOnGitHubUrl = status?.html_url || state.prUrl
 
   const handleStartOver = () => {
@@ -99,151 +136,289 @@ export default function Status() {
     navigate('/')
   }
 
+  // Determine conclusion for banner
+  const conclusion = status?.conclusion
+  const conclusionConfig = {
+    success: {
+      icon: 'task_alt',
+      color: '#00d2ff',
+      bg: 'rgba(0, 210, 255, 0.05)',
+      border: 'rgba(0, 210, 255, 0.2)',
+      label: 'Pipeline Succeeded',
+      message: 'All jobs completed successfully. Your workflow is ready!',
+    },
+    failure: {
+      icon: 'error',
+      color: '#f87171',
+      bg: 'rgba(239, 68, 68, 0.05)',
+      border: 'rgba(239, 68, 68, 0.2)',
+      label: 'Pipeline Failed',
+      message: 'One or more jobs failed. Check the logs on GitHub for details.',
+    },
+    cancelled: {
+      icon: 'block',
+      color: '#859399',
+      bg: 'rgba(133, 147, 153, 0.05)',
+      border: 'rgba(133, 147, 153, 0.2)',
+      label: 'Pipeline Cancelled',
+      message: 'The workflow run was cancelled.',
+    },
+  }
+  const banner = conclusion ? conclusionConfig[conclusion] : null
+
   return (
     <PageWrapper>
-      <div className="w-full flex justify-center py-12">
-        <div className="w-full max-w-3xl px-8 flex flex-col items-center text-center gap-8">
+      {/* Ambient glow effects */}
+      <div className="ambient-glow-left"></div>
+      <div className="ambient-glow-right"></div>
 
-          {/* Progress bar */}
-          <div className="w-full">
-            <Stepper steps={WIZARD_STEPS} currentStep={5} />
-          </div>
-
-          {/* Header */}
-          <div className="animate-fade-in" style={{ marginTop: '20px' }}>
-            <h2 className="text-3xl font-bold text-[var(--color-text-primary)] mb-3">
-              Pipeline Status
-            </h2>
-            <p className="text-base text-[var(--color-text-secondary)]">
-              {state.runId && state.runId !== 'latest' ? (
-                <>Monitoring workflow run <span className="text-indigo-400 font-mono">#{state.runId}</span></>
-              ) : (
-                <>Monitoring workflow run on branch <span className="text-indigo-400 font-mono">ci/add-pipeline</span></>
-              )}
-            </p>
-          </div>
-
-          {/* Status Card */}
-          <div className="w-full animate-slide-up">
-            {!state.runId && state.prUrl ? (
-              /* PR opened but no workflow run detected */
-              <div className="rounded-2xl bg-[var(--color-bg-card)] border border-green-500/20 p-10 shadow-lg">
-                <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-5 text-3xl">
-                  🚀
-                </div>
-                <h3 className="text-xl font-semibold text-green-400 mb-3">Pull Request Opened Successfully!</h3>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-4 max-w-md mx-auto leading-relaxed">
-                  We successfully created the branch <span className="text-indigo-400 font-mono">ci/add-pipeline</span>,
-                  committed the workflow file, and opened a Pull Request.
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] italic leading-relaxed">
-                  Note: No running pipeline run was detected yet. If your workflow contains triggers for push/PR to main,
-                  GitHub Actions will run when the Pull Request is merged or when code is pushed to target branches.
-                </p>
-              </div>
-            ) : error ? (
-              /* Error state */
-              <div className="rounded-2xl bg-[var(--color-bg-card)] border border-red-500/20 p-10 shadow-lg">
-                <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-5">
-                  <svg className="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-red-400 mb-2">
-                  {error.includes('not found') || error.includes('404') ? 'Run Not Found' : 'Error'}
-                </h3>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-4 leading-relaxed">{error}</p>
-                {(error.includes('not found') || error.includes('404')) && (
-                  <p className="text-xs text-[var(--color-text-muted)]">
-                    The workflow run ID may be invalid or the run may have been deleted from GitHub.
-                  </p>
-                )}
-              </div>
-            ) : !status ? (
-              /* Loading / waiting for run */
-              <div className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] p-12 shadow-lg">
-                <Spinner size="lg" className="mb-6" />
-                <p className="text-[var(--color-text-secondary)] font-medium text-base mb-2">
-                  {loading ? 'Connecting to GitHub…' : 'Waiting for GitHub Actions to trigger…'}
-                </p>
-                <p className="text-sm text-[var(--color-text-muted)] max-w-sm mx-auto leading-relaxed">
-                  GitHub takes a few seconds to register and start the workflow run after opening a Pull Request. We are checking for updates...
-                </p>
-              </div>
-            ) : (
-              /* Status with jobs */
-              <div className="rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)] p-8 shadow-lg">
-                <StatusTracker
-                  jobs={status.jobs || []}
-                />
-                {/* Polling indicator */}
-                {status.status !== 'completed' && (
-                  <div className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                    <Spinner size="xs" />
-                    Refreshing every 5 seconds…
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Conclusion Banner — shown at top when completed */}
-          {conclusionBanner && (
-            <div
-              id="conclusion-banner"
-              className={`w-full rounded-2xl ${conclusionBanner.bg} border ${conclusionBanner.border} p-6 animate-fade-in`}
-            >
-              <div className="flex items-center justify-center gap-4">
-                <div className={`flex-shrink-0 ${conclusionBanner.color}`}>
-                  {conclusionBanner.icon}
-                  <lb> </lb>
-                </div>
-                <div className="text-left">
-                  <h3 className={`text-lg font-semibold ${conclusionBanner.color}`}>
-                    {conclusionBanner.label}
-                  </h3>
-                  <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                    {conclusionBanner.message}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* View on GitHub button */}
-          {viewOnGitHubUrl && (
-            <div className="animate-fade-in">
-              <a
-                href={viewOnGitHubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                id="view-on-github-btn"
-                className="inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-hover)] text-[var(--color-text-primary)] text-base font-semibold transition-colors cursor-pointer border border-[var(--color-border)] shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                View on GitHub
-              </a>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-center gap-4 animate-fade-in pb-8" style={{ animationDelay: '0.2s' }}>
-            <Button
-              id="start-over-btn"
-              variant="ghost"
-              size="lg"
-              onClick={handleStartOver}
-            >
-              ← Start Over
-            </Button>
-          </div>
-
+      <main style={{
+        flexGrow: 1,
+        position: 'relative', zIndex: 10,
+        width: '100%', maxWidth: '1024px',
+        margin: '0 auto',
+        padding: '120px 24px 48px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Stepper */}
+        <div style={{ width: '100%', maxWidth: '800px', marginBottom: '48px' }}>
+          <Stepper steps={WIZARD_STEPS} currentStep={5} />
         </div>
-      </div>
+
+        {/* Status Hero */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <h1 style={{
+            fontFamily: 'Geist, Inter, sans-serif',
+            fontSize: '48px', lineHeight: 1.1, letterSpacing: '-0.02em',
+            fontWeight: 700, color: '#dde3e7', marginBottom: '4px',
+          }}>
+            Pipeline Status
+          </h1>
+          <p style={{
+            fontFamily: 'Inter, sans-serif', fontSize: '16px',
+            lineHeight: 1.6, color: 'rgba(0, 210, 255, 0.8)',
+          }}>
+            {state.runId && state.runId !== 'latest' ? (
+              <>Monitoring workflow run <span style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
+                letterSpacing: '0.02em', fontWeight: 500, opacity: 0.8,
+              }}>#{state.runId}</span></>
+            ) : (
+              <>Monitoring workflow run on branch <span style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
+                letterSpacing: '0.02em', fontWeight: 500, opacity: 0.8,
+              }}>ci/add-pipeline</span></>
+            )}
+          </p>
+        </div>
+
+        {/* Status content */}
+        <div style={{ width: '100%', marginBottom: '24px' }}>
+          {!state.runId && state.prUrl ? (
+            /* PR opened but no workflow run detected */
+            <div className="glass-panel" style={{
+              borderRadius: '12px', padding: '40px', textAlign: 'center',
+            }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '9999px',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}>
+                <span className="material-symbols-outlined" style={{
+                  fontSize: '28px', color: '#34d399',
+                  fontVariationSettings: "'FILL' 1",
+                }}>rocket_launch</span>
+              </div>
+              <h3 style={{
+                fontFamily: 'Geist, Inter, sans-serif', fontSize: '20px',
+                fontWeight: 600, color: '#34d399', marginBottom: '12px',
+              }}>
+                Pull Request Opened Successfully!
+              </h3>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                color: '#bbc9cf', marginBottom: '16px', maxWidth: '448px',
+                margin: '0 auto 16px', lineHeight: 1.5,
+              }}>
+                We successfully created the branch <span style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
+                  color: '#00d2ff',
+                }}>ci/add-pipeline</span>,
+                committed the workflow file, and opened a Pull Request.
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '12px',
+                color: '#859399', fontStyle: 'italic', lineHeight: 1.5,
+              }}>
+                Note: No running pipeline run was detected yet. If your workflow contains triggers for push/PR to main,
+                GitHub Actions will run when the Pull Request is merged or when code is pushed to target branches.
+              </p>
+            </div>
+          ) : error ? (
+            /* Error state */
+            <div className="glass-panel" style={{
+              borderRadius: '12px', padding: '40px', textAlign: 'center',
+            }}>
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '9999px',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '28px', color: '#f87171' }}>error</span>
+              </div>
+              <h3 style={{
+                fontFamily: 'Geist, Inter, sans-serif', fontSize: '20px',
+                fontWeight: 600, color: '#f87171', marginBottom: '8px',
+              }}>
+                {error.includes('not found') || error.includes('404') ? 'Run Not Found' : 'Error'}
+              </h3>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                color: '#bbc9cf', marginBottom: '16px', lineHeight: 1.5,
+              }}>{error}</p>
+              {(error.includes('not found') || error.includes('404')) && (
+                <p style={{
+                  fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#859399',
+                }}>
+                  The workflow run ID may be invalid or the run may have been deleted from GitHub.
+                </p>
+              )}
+            </div>
+          ) : !status ? (
+            /* Loading / waiting for run */
+            <div className="glass-panel" style={{
+              borderRadius: '12px', padding: '48px', textAlign: 'center',
+            }}>
+              <Spinner size="lg" className="mb-6" />
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '16px',
+                color: '#bbc9cf', fontWeight: 500, marginBottom: '8px', marginTop: '24px',
+              }}>
+                {loading ? 'Connecting to GitHub…' : 'Waiting for GitHub Actions to trigger…'}
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                color: '#859399', maxWidth: '384px', margin: '0 auto', lineHeight: 1.5,
+              }}>
+                GitHub takes a few seconds to register and start the workflow run after opening a Pull Request. We are checking for updates...
+              </p>
+            </div>
+          ) : (
+            /* Status with jobs */
+            <>
+              <StatusTracker jobs={status.jobs || []} />
+
+              {/* Terminal / Log output */}
+              {(status.jobs || []).length > 0 && (
+                <div style={{ marginTop: '24px', width: '100%' }}>
+                  <TerminalOutput
+                    title="Pipeline run output"
+                    lines={buildLogLines(status.jobs)}
+                  />
+                </div>
+              )}
+
+              {/* Polling indicator */}
+              {status.status !== 'completed' && (
+                <div style={{
+                  marginTop: '24px', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', gap: '8px',
+                  fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#bbc9cf',
+                }}>
+                  <Spinner size="xs" />
+                  Refreshing every 5 seconds…
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Conclusion Banner */}
+        {banner && (
+          <div className="animate-fade-in" style={{
+            width: '100%', borderRadius: '12px',
+            backgroundColor: banner.bg,
+            border: `1px solid ${banner.border}`,
+            padding: '16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px',
+            marginBottom: '24px',
+          }}>
+            <span className="material-symbols-outlined" style={{
+              fontSize: '28px', color: banner.color,
+              fontVariationSettings: "'FILL' 1",
+            }}>{banner.icon}</span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '20px',
+                fontWeight: 700, color: banner.color,
+              }}>{banner.label}</span>
+              <span style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#bbc9cf',
+              }}>{banner.message}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          gap: '16px', marginTop: '8px',
+        }}>
+          {viewOnGitHubUrl && (
+            <a
+              href={viewOnGitHubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="view-on-github-btn"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '12px 48px', borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#dde3e7',
+                fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: 700,
+                textDecoration: 'none', cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 210, 255, 0.2)'
+                e.currentTarget.style.transform = 'scale(1.02)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)'
+                e.currentTarget.style.transform = 'scale(1)'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#00d2ff' }}>code_blocks</span>
+              View on GitHub
+            </a>
+          )}
+
+          <button
+            id="start-over-btn"
+            onClick={handleStartOver}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '4px',
+              backgroundColor: 'transparent', border: 'none',
+              color: '#bbc9cf', cursor: 'pointer',
+              fontFamily: 'Inter, sans-serif', fontSize: '14px',
+              transition: 'color 0.3s',
+              padding: '4px 0',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#00d2ff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#bbc9cf'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_left_alt</span>
+            Start Over
+          </button>
+        </div>
+      </main>
     </PageWrapper>
   )
 }
-
-

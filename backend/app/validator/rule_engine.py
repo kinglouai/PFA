@@ -18,6 +18,13 @@ from app.validator.rules.branch_rules import (
     check_cache_missing,
     check_no_timeout,
 )
+from app.validator.rules.matrix_rules import (
+    check_matrix_os_mismatch,
+    check_matrix_version_empty,
+)
+from app.validator.rules.coverage_rules import check_coverage_threshold_missing
+from app.validator.rules.release_rules import check_release_missing_secret
+from app.validator.rules.multistack_rules import check_duplicate_job_names
 
 
 # Registry of all rule functions to execute
@@ -28,6 +35,11 @@ _RULES = [
     check_triggers_present,
     check_cache_missing,
     check_no_timeout,
+    check_matrix_os_mismatch,
+    check_matrix_version_empty,
+    check_coverage_threshold_missing,
+    check_release_missing_secret,
+    check_duplicate_job_names,
 ]
 
 

@@ -68,7 +68,7 @@ def _parse_pom(pom_content: str, result: dict) -> None:
 
         # Framework detection
         if "spring-boot" in all_text:
-            result["framework"] = "spring"
+            result["framework"] = "spring-boot"
         elif "quarkus" in all_text:
             result["framework"] = "quarkus"
         elif "micronaut" in all_text:
@@ -114,7 +114,7 @@ def _parse_gradle(gradle_content: str, result: dict) -> None:
 
     # ── Detect framework ─────────────────────────────────────────────
     if "spring-boot" in content_lower or "org.springframework.boot" in content_lower:
-        result["framework"] = "spring"
+        result["framework"] = "spring-boot"
     elif "quarkus" in content_lower:
         result["framework"] = "quarkus"
 

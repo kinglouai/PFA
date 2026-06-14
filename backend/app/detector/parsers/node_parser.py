@@ -44,12 +44,18 @@ def parse_node_project(
     # ── Detect framework ─────────────────────────────────────────────
     if "next" in dep_names:
         result["framework"] = "next"
+    elif "nuxt" in dep_names:
+        result["framework"] = "nuxt"
+    elif "react" in dep_names:
+        result["framework"] = "react"
+    elif "vue" in dep_names:
+        result["framework"] = "vue"
+    elif "@angular/core" in dep_names:
+        result["framework"] = "angular"
     elif "express" in dep_names:
         result["framework"] = "express"
     elif "vite" in dep_names or "vite" in pkg.get("devDependencies", {}):
         result["framework"] = "vite"
-    elif "nuxt" in dep_names:
-        result["framework"] = "nuxt"
 
     # ── Detect test framework ────────────────────────────────────────
     if "vitest" in dep_names:

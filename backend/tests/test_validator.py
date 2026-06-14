@@ -328,3 +328,206 @@ class TestNoTimeout:
         assert len(results) == 1
         assert "'build'" in results[0]["message"]
         assert "'test'" not in results[0]["message"]
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Rule: matrix_os_mismatch (WARNING)
+# ═══════════════════════════════════════════════════════════════════════
+
+from app.validator.rules.matrix_rules import (
+    check_matrix_os_mismatch,
+    check_matrix_version_empty,
+)
+
+
+class TestMatrixOsMismatch:
+    """Warn if matrix targets Windows but uses bash syntax."""
+
+    def test_valid_no_windows(self):
+        """No warning when matrix only targets ubuntu."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "strategy": {
+                        "matrix": {
+                            "os": ["ubuntu-latest"],
+                        }
+                    },
+                    "steps": [
+                        {"run": "chmod +x gradlew"},
+                    ],
+                }
+            }
+        }
+        results = check_matrix_os_mismatch(yaml_dict)
+        assert len(results) == 0
+
+    def test_invalid_windows_with_bash(self):
+        """Warning when Windows is targeted but bash syntax is used."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "strategy": {
+                        "matrix": {
+                            "os": ["ubuntu-latest", "windows-latest"],
+                        }
+                    },
+                    "steps": [
+                        {"run": "chmod +x gradlew"},
+                    ],
+                }
+            }
+        }
+        results = check_matrix_os_mismatch(yaml_dict)
+        assert len(results) == 1
+        assert results[0]["rule_id"] == "matrix_os_mismatch"
+        assert results[0]["level"] == "warning"
+
+
+class TestMatrixVersionEmpty:
+    """Warn if matrix has empty version list."""
+
+    def test_valid_versions_present(self):
+        """No warning when versions are populated."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "strategy": {
+                        "matrix": {
+                            "python-version": ["3.10", "3.11"],
+                        }
+                    },
+                }
+            }
+        }
+        results = check_matrix_version_empty(yaml_dict)
+        assert len(results) == 0
+
+    def test_invalid_empty_versions(self):
+        """Warning when version list is empty."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "strategy": {
+                        "matrix": {
+                            "python-version": [],
+                        }
+                    },
+                }
+            }
+        }
+        results = check_matrix_version_empty(yaml_dict)
+        assert len(results) == 1
+        assert results[0]["rule_id"] == "matrix_version_empty"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Rule: coverage_threshold_missing (WARNING)
+# ═══════════════════════════════════════════════════════════════════════
+
+from app.validator.rules.coverage_rules import check_coverage_threshold_missing
+
+
+class TestCoverageThresholdMissing:
+    """Warn if coverage step exists but no threshold is set."""
+
+    def test_valid_with_threshold(self):
+        """No warning when coverage step has --cov-fail-under."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "steps": [
+                        {"name": "Run coverage", "run": "pytest --cov --cov-fail-under=80"},
+                    ]
+                }
+            }
+        }
+        results = check_coverage_threshold_missing(yaml_dict)
+        assert len(results) == 0
+
+    def test_invalid_no_threshold(self):
+        """Warning when coverage step has no threshold."""
+        yaml_dict = {
+            "jobs": {
+                "test": {
+                    "steps": [
+                        {"name": "Run coverage", "run": "pytest --cov"},
+                    ]
+                }
+            }
+        }
+        results = check_coverage_threshold_missing(yaml_dict)
+        assert len(results) == 1
+        assert results[0]["rule_id"] == "coverage_threshold_missing"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Rule: release_missing_secret (ERROR)
+# ═══════════════════════════════════════════════════════════════════════
+
+from app.validator.rules.release_rules import check_release_missing_secret
+
+
+class TestReleaseMissingSecret:
+    """Error if release job has no secrets reference."""
+
+    def test_valid_release_with_secret(self):
+        """No error when release job uses ${{ secrets.* }}."""
+        yaml_dict = {
+            "jobs": {
+                "release": {
+                    "steps": [
+                        {
+                            "name": "Publish",
+                            "env": {"GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}"},
+                        }
+                    ]
+                }
+            }
+        }
+        results = check_release_missing_secret(yaml_dict)
+        assert len(results) == 0
+
+    def test_invalid_release_no_secret(self):
+        """Error when release job has no secret."""
+        yaml_dict = {
+            "jobs": {
+                "release": {
+                    "steps": [
+                        {"name": "Publish", "run": "echo 'publish'"},
+                    ]
+                }
+            }
+        }
+        results = check_release_missing_secret(yaml_dict)
+        assert len(results) == 1
+        assert results[0]["rule_id"] == "release_missing_secret"
+        assert results[0]["level"] == "error"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Rule: duplicate_job_names (ERROR)
+# ═══════════════════════════════════════════════════════════════════════
+
+from app.validator.rules.multistack_rules import check_duplicate_job_names
+
+
+class TestDuplicateJobNames:
+    """Error if two jobs share the same name (case-insensitive)."""
+
+    def test_valid_unique_names(self):
+        """No error when all job names are unique."""
+        yaml_dict = {
+            "jobs": {
+                "test-python": {"runs-on": "ubuntu-latest"},
+                "test-node": {"runs-on": "ubuntu-latest"},
+            }
+        }
+        results = check_duplicate_job_names(yaml_dict)
+        assert len(results) == 0
+
+    def test_no_jobs(self):
+        """No error when there are no jobs."""
+        yaml_dict = {"name": "Empty workflow"}
+        results = check_duplicate_job_names(yaml_dict)
+        assert len(results) == 0

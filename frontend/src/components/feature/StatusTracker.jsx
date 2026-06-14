@@ -1,78 +1,41 @@
 /**
- * StatusTracker — live run status with step-by-step jobs.
- * Shows each job with expandable individual steps (like GitHub Actions UI).
- * Single "View on GitHub" button — no duplicates.
+ * StatusTracker — Stitch AI styled pipeline jobs table.
+ * Glass-panel container with expandable job rows and Material Symbol icons.
  */
 import { useState } from 'react'
 
-/**
- * SVG Icons — spinner, checkmark, X, and clock (queued).
- */
-const SpinnerIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={`${className} text-blue-400 animate-spin`} viewBox="0 0 24 24" fill="none">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-  </svg>
-)
-
-const CheckmarkIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={`${className} text-green-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-)
-
-const FailureIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={`${className} text-red-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-)
-
-const QueuedIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={`${className} text-amber-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
-
-const CancelledIcon = ({ className = 'w-5 h-5' }) => (
-  <svg className={`${className} text-gray-400`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-  </svg>
-)
-
-function getJobIcon(status, conclusion, className) {
-  if (status === 'in_progress') return <SpinnerIcon className={className} />
+function getJobIcon(status, conclusion) {
+  if (status === 'in_progress') return { icon: 'sync', color: '#47d6ff', spin: true }
   if (status === 'completed') {
-    if (conclusion === 'success') return <CheckmarkIcon className={className} />
-    if (conclusion === 'failure') return <FailureIcon className={className} />
-    if (conclusion === 'cancelled') return <CancelledIcon className={className} />
-    return <CheckmarkIcon className={className} />
+    if (conclusion === 'success') return { icon: 'check_circle', color: '#00d2ff', spin: false }
+    if (conclusion === 'failure') return { icon: 'cancel', color: '#f87171', spin: false }
+    if (conclusion === 'cancelled') return { icon: 'block', color: '#859399', spin: false }
+    return { icon: 'check_circle', color: '#00d2ff', spin: false }
   }
-  return <QueuedIcon className={className} />
+  return { icon: 'schedule', color: '#ffb229', spin: false }
 }
 
-function getJobStyle(status, conclusion) {
-  if (status === 'in_progress') {
-    return { label: 'Running', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' }
-  }
+function getStepIcon(status, conclusion) {
+  if (status === 'in_progress') return { icon: 'sync', color: 'rgba(71, 214, 255, 0.7)', spin: true }
   if (status === 'completed') {
-    if (conclusion === 'success') {
-      return { label: 'Passed', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' }
-    }
-    if (conclusion === 'failure') {
-      return { label: 'Failed', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' }
-    }
-    if (conclusion === 'cancelled') {
-      return { label: 'Cancelled', color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/20' }
-    }
-    return { label: 'Completed', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' }
+    if (conclusion === 'success') return { icon: 'check', color: 'rgba(0, 210, 255, 0.7)', spin: false }
+    if (conclusion === 'failure') return { icon: 'close', color: '#f87171', spin: false }
+    return { icon: 'check', color: 'rgba(0, 210, 255, 0.7)', spin: false }
   }
-  return { label: 'Queued', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' }
+  return { icon: 'schedule', color: 'rgba(255, 178, 41, 0.5)', spin: false }
 }
 
-/**
- * Default GitHub Actions steps for a typical CI run.
- * When the API returns individual steps per job, use those instead.
- */
+function getStatusLabel(status, conclusion) {
+  if (status === 'in_progress') return { label: 'Running', color: '#47d6ff' }
+  if (status === 'completed') {
+    if (conclusion === 'success') return { label: 'Passed', color: '#00d2ff' }
+    if (conclusion === 'failure') return { label: 'Failed', color: '#f87171' }
+    if (conclusion === 'cancelled') return { label: 'Cancelled', color: '#859399' }
+    return { label: 'Completed', color: '#00d2ff' }
+  }
+  return { label: 'Queued', color: '#ffb229' }
+}
+
 const DEFAULT_STEPS = [
   'Set up job',
   'Checkout code',
@@ -82,11 +45,9 @@ const DEFAULT_STEPS = [
 ]
 
 function getStepsForJob(job) {
-  // If the API provides individual steps, use them.
   if (job.steps && job.steps.length > 0) {
     return job.steps
   }
-  // Otherwise generate synthetic steps based on the job status
   if (job.status === 'completed') {
     return DEFAULT_STEPS.map((name) => ({
       name,
@@ -109,73 +70,153 @@ function getStepsForJob(job) {
 }
 
 
-export default function StatusTracker({ jobs = [], htmlUrl = null }) {
-  const [expandedJob, setExpandedJob] = useState(0) // First job expanded by default
+export default function StatusTracker({ jobs = [] }) {
+  const [expandedJob, setExpandedJob] = useState(0)
 
   if (!jobs || jobs.length === 0) {
     return (
-      <div className="text-center text-[var(--color-text-muted)] py-6 text-sm">
+      <div style={{
+        textAlign: 'center', padding: '24px',
+        fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#859399',
+      }}>
         No jobs found yet. Waiting for GitHub Actions to start…
       </div>
     )
   }
 
   return (
-    <div className="w-full text-center">
-      <h4 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-4">
-        Pipeline Jobs
-      </h4>
+    <div className="glass-panel" style={{
+      borderRadius: '12px', overflow: 'hidden', width: '100%',
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '8px 16px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
+          letterSpacing: '0.08em', fontWeight: 500,
+          color: '#bbc9cf', textTransform: 'uppercase',
+        }}>
+          Pipeline Jobs
+        </span>
+      </div>
 
-      {/* Job list */}
-      <div className="space-y-4">
+      {/* Job rows */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {jobs.map((job, idx) => {
-          const style = getJobStyle(job.status, job.conclusion)
           const isExpanded = expandedJob === idx
+          const jobIcon = getJobIcon(job.status, job.conclusion)
+          const statusLabel = getStatusLabel(job.status, job.conclusion)
           const steps = getStepsForJob(job)
 
           return (
-            <div key={idx} className="rounded-xl overflow-hidden border border-[var(--color-border)]">
-              {/* Job header — clickable to expand */}
+            <div key={idx}>
+              {/* Parent job row */}
               <button
                 id={`job-${idx}`}
                 onClick={() => setExpandedJob(isExpanded ? -1 : idx)}
-                className={`w-full flex items-center gap-3 px-5 py-4 ${style.bg} transition-all duration-300 cursor-pointer bg-transparent border-none text-left`}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '8px 16px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                  backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                  cursor: 'pointer', transition: 'background-color 0.2s',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <div className="flex-shrink-0">
-                  {getJobIcon(job.status, job.conclusion, 'w-5 h-5')}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: '20px', color: jobIcon.color,
+                      fontVariationSettings: "'FILL' 1",
+                      animation: jobIcon.spin ? 'spin 1s linear infinite' : 'none',
+                    }}
+                  >
+                    {jobIcon.icon}
+                  </span>
+                  <span style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '20px',
+                    fontWeight: 600, lineHeight: 1.4, color: '#dde3e7',
+                  }}>
+                    {job.name}
+                  </span>
                 </div>
-                <span className="flex-1 text-sm text-[var(--color-text-primary)] font-semibold truncate">
-                  {job.name}
-                </span>
-                <span className={`text-xs font-medium ${style.color} whitespace-nowrap`}>
-                  {style.label}
-                </span>
-                <svg
-                  className={`w-4 h-4 text-[var(--color-text-muted)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <span style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '14px', color: statusLabel.color,
+                  }}>
+                    {statusLabel.label}
+                  </span>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: '20px', color: '#bbc9cf',
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s',
+                    }}
+                  >
+                    expand_more
+                  </span>
+                </div>
               </button>
 
-              {/* Expanded steps — individual step rows */}
+              {/* Expanded steps */}
               {isExpanded && (
-                <div className="border-t border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
+                <div style={{
+                  backgroundColor: 'rgba(9, 15, 18, 0.5)',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                  padding: '4px 0',
+                }}>
                   {steps.map((step, stepIdx) => {
-                    const stepStyle = getJobStyle(step.status, step.conclusion)
+                    const stepIcon = getStepIcon(step.status, step.conclusion)
+                    const stepLabel = getStatusLabel(step.status, step.conclusion)
+                    const isHighlighted = step.name === 'Run tests'
+
                     return (
                       <div
                         key={stepIdx}
-                        className="flex items-center gap-4 px-6 py-4 border-b border-[var(--color-border)]/50 last:border-b-0"
+                        style={{
+                          padding: '6px 48px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          transition: 'background-color 0.2s',
+                          ...(isHighlighted ? {
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                            borderLeft: '2px solid #00d2ff',
+                          } : {}),
+                        }}
+                        onMouseEnter={(e) => { if (!isHighlighted) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)' }}
+                        onMouseLeave={(e) => { if (!isHighlighted) e.currentTarget.style.backgroundColor = 'transparent' }}
                       >
-                        <div className="flex-shrink-0 w-5 flex items-center justify-center">
-                          {getJobIcon(step.status, step.conclusion, 'w-5 h-5')}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: '18px', color: stepIcon.color,
+                              animation: stepIcon.spin ? 'spin 1s linear infinite' : 'none',
+                            }}
+                          >
+                            {stepIcon.icon}
+                          </span>
+                          <span style={{
+                            fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                            color: isHighlighted ? '#dde3e7' : '#bbc9cf',
+                            fontWeight: isHighlighted ? 500 : 400,
+                          }}>
+                            {step.name}
+                          </span>
                         </div>
-                        <span className="flex-1 text-sm text-[var(--color-text-secondary)] text-left">
-                          {step.name}
-                        </span>
-                        <span className={`text-xs font-medium ${stepStyle.color}`}>
-                          {stepStyle.label}
+                        <span style={{
+                          fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                          color: isHighlighted ? '#00d2ff' : `${stepLabel.color}cc`,
+                        }}>
+                          {stepLabel.label}
                         </span>
                       </div>
                     )
@@ -186,8 +227,6 @@ export default function StatusTracker({ jobs = [], htmlUrl = null }) {
           )
         })}
       </div>
-
-      {/* NO duplicate "View on GitHub" here — the Status page handles it */}
     </div>
   )
 }

@@ -2,14 +2,13 @@
  * RepoInput — repo URL input + "Analyze" button.
  * Calls detect API and stores result in WizardContext.
  * Shows loading spinner in button and friendly errors for 404/403.
+ * Styled with Stitch AI glowing input container.
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWizard } from '../../context/WizardContext.jsx'
 import { useAuth } from '../../hooks/useAuth.js'
 import { detectStack } from '../../api/detect.js'
-import Button from '../ui/Button.jsx'
-import Input from '../ui/Input.jsx'
 
 export default function RepoInput() {
   const [repoUrl, setRepoUrl] = useState('')
@@ -61,48 +60,96 @@ export default function RepoInput() {
   const isPrivateRepoError = error && (error.includes('private') || error.includes('403'))
 
   return (
-    <div className="w-full max-w-3xl mx-auto animate-slide-up">
-      {/* Input group */}
-      <div className="relative">
-        <div className="flex gap-4 items-center">
-          <div className="flex-1" onKeyDown={handleKeyDown}>
-            <Input
-              id="repo-url-input"
-              value={repoUrl}
-              onChange={(e) => {
-                setRepoUrl(e.target.value)
-                if (error) setError(null)
-              }}
-              placeholder="https://github.com/user/repo"
-              error={!!error}
-              disabled={loading}
-              className="px-6 py-5 text-lg rounded-2xl"
-            />
-          </div>
-          <Button
-            id="analyze-btn"
-            onClick={handleAnalyze}
-            loading={loading}
+    <div className="w-full animate-slide-up">
+      {/* Glowing input container — matches Stitch AI template */}
+      <div className="glow-input-container" style={{ display: 'flex', alignItems: 'center', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', backgroundColor: '#161d1f', borderRadius: '11px', overflow: 'hidden' }}>
+          <input
+            id="repo-url-input"
+            type="text"
+            value={repoUrl}
+            onChange={(e) => {
+              setRepoUrl(e.target.value)
+              if (error) setError(null)
+            }}
+            onKeyDown={handleKeyDown}
             disabled={loading}
-            size="lg"
-            className="px-8 py-5 text-lg rounded-2xl gap-3 flex-shrink-0"
-          >
-            {loading ? 'Analyzing...' : 'Analyze'}
-            {!loading && (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            )}
-          </Button>
+            placeholder="https://github.com/user/repo"
+            aria-label="GitHub Repository URL"
+            style={{
+              flexGrow: 1,
+              backgroundColor: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: '#dde3e7',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '13px',
+              letterSpacing: '0.02em',
+              fontWeight: 500,
+              padding: '16px 24px',
+              opacity: loading ? 0.5 : 1,
+            }}
+          />
+          <div style={{ padding: '8px' }}>
+            <button
+              id="analyze-btn"
+              onClick={handleAnalyze}
+              disabled={loading}
+              className="gradient-btn"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '13px',
+                letterSpacing: '0.02em',
+                fontWeight: 500,
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                opacity: loading ? 0.7 : 1,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  Analyze
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'wght' 600" }}>arrow_forward</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="mt-3 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
+        <div
+          className="animate-fade-in"
+          style={{
+            marginTop: '12px',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(147, 0, 10, 0.15)',
+            border: '1px solid rgba(255, 180, 171, 0.2)',
+            color: '#ffb4ab',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '14px',
+          }}
+        >
           <p>{error}</p>
           {isPrivateRepoError && (
-            <p className="mt-2 text-xs text-amber-400/80">
+            <p style={{ marginTop: '8px', fontSize: '12px', color: 'rgba(255, 215, 159, 0.8)' }}>
               💡 Tip: Connect your GitHub account to access private repositories.
             </p>
           )}
@@ -110,7 +157,13 @@ export default function RepoInput() {
       )}
 
       {/* Helper text */}
-      <p className="mt-4 text-center text-xs text-[var(--color-text-muted)]">
+      <p style={{
+        marginTop: '16px',
+        textAlign: 'center',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: '12px',
+        color: '#859399',
+      }}>
         Paste any public GitHub repository URL to auto-detect the tech stack
       </p>
     </div>

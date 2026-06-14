@@ -1,0 +1,40 @@
+---
+name: Swift Tests
+
+on:
+{% if branch_trigger == "push" %}
+  push:
+    branches: [main, develop]
+{% elif branch_trigger == "pull_request" %}
+  pull_request:
+    branches: [main]
+{% else %}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+{% endif %}
+
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: swift build
+
+      - name: Run tests
+        run: {{ test_command }}
+{% if enable_deploy_sim %}
+
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Simulate deployment
+        run: echo "Deploying application..."
+{% endif %}

@@ -83,7 +83,7 @@ class TestPythonDetection:
             "Dockerfile",
         ]
 
-        def read_side_effect(repo_url, path):
+        def read_side_effect(repo_url, path, token=None):
             if path == "requirements.txt":
                 return PYTHON_REQUIREMENTS
             if path == "pyproject.toml":
@@ -192,7 +192,7 @@ class TestJavaDetection:
             "src/test/java/AppTest.java",
         ]
 
-        def read_side_effect(repo_url, path):
+        def read_side_effect(repo_url, path, token=None):
             if path == "pom.xml":
                 return JAVA_POM_XML
             return None
@@ -202,7 +202,7 @@ class TestJavaDetection:
         result = detect_stack("https://github.com/test/java-app")
 
         assert result["language"] == "java"
-        assert result["framework"] == "spring"
+        assert result["framework"] == "spring-boot"
         assert result["test_framework"] == "junit"
         assert result["version"] == "17"
         assert result["package_manager"] == "maven"
@@ -214,7 +214,7 @@ class TestJavaDetection:
         """Detect a Java project using Gradle."""
         mock_tree.return_value = ["build.gradle", "src/main/java/App.java"]
 
-        def read_side_effect(repo_url, path):
+        def read_side_effect(repo_url, path, token=None):
             if path == "build.gradle":
                 return "sourceCompatibility = '17'\ndependencies { testImplementation 'junit:junit:4.13' }"
             return None

@@ -59,7 +59,12 @@ def check_test_job_exists(yaml_dict: dict) -> list[dict]:
     test_job_names = {"test", "tests", "run-tests", "run_tests"}
     job_names = {name.lower() for name in jobs.keys()}
 
-    if not job_names.intersection(test_job_names):
+    has_test_job = any(
+        name in test_job_names or name.startswith("test-") or name.startswith("run-tests-")
+        for name in job_names
+    )
+
+    if not has_test_job:
         results.append({
             "level": "warning",
             "rule_id": "test_job_exists",

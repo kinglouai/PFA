@@ -1,16 +1,16 @@
 /**
- * CheckSelector — CI checks displayed as selectable tiles/cards.
- * Clicking a tile highlights/selects it. Centered layout.
+ * CheckSelector — CI checks displayed as glass-card tiles with Material Symbol icons.
+ * Clicking a tile toggles its selection with a cyan glow state.
+ * Styled to match the Stitch AI "Select CI Checks" template.
  */
 import { useState, useEffect } from 'react'
 import { CHECK_OPTIONS } from '../../utils/constants.js'
-import Button from '../ui/Button.jsx'
 
-export default function CheckSelector({ detectedStack, onGenerate, loading = false }) {
-  const [selectedChecks, setSelectedChecks] = useState([])
-
+export default function CheckSelector({ detectedStack, value = [], onChange }) {
   // Pre-toggle checks based on detected stack
   useEffect(() => {
+    if (value.length > 0) return // Don't override if already initialized
+
     const initial = []
 
     // Always add test
@@ -29,73 +29,80 @@ export default function CheckSelector({ detectedStack, onGenerate, loading = fal
     // Add cache by default
     initial.push('cache')
 
-    setSelectedChecks(initial)
+    onChange(initial)
   }, [detectedStack])
 
   const toggleCheck = (checkId) => {
-    setSelectedChecks((prev) =>
-      prev.includes(checkId)
-        ? prev.filter((id) => id !== checkId)
-        : [...prev, checkId]
+    onChange(
+      value.includes(checkId)
+        ? value.filter((id) => id !== checkId)
+        : [...value, checkId]
     )
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto animate-fade-in text-center">
-      {/* Tile grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+    <div className="w-full animate-fade-in">
+      {/* Responsive grid — 1 col mobile, 2 col md, 3 col lg, 4 col xl */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+        gap: '16px',
+        marginBottom: '48px',
+      }}>
         {CHECK_OPTIONS.map((check) => {
-          const selected = selectedChecks.includes(check.id)
+          const selected = value.includes(check.id)
           return (
-            <button
+            <label
               key={check.id}
-              onClick={() => toggleCheck(check.id)}
-              className={`relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer bg-transparent text-center group
-                ${selected
-                  ? 'bg-indigo-500/10 border-indigo-500/50 shadow-lg shadow-indigo-500/10'
-                  : 'bg-[var(--color-bg-card)] border-[var(--color-border)] hover:border-[var(--color-border-hover)] hover:bg-[var(--color-bg-tertiary)]/30'
-                }`}
+              className={`glass-card ${selected ? 'selected' : ''}`}
+              style={{
+                borderRadius: '12px',
+                padding: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                height: '100%',
+                zIndex: 10,
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                toggleCheck(check.id)
+              }}
             >
-              {/* Selected indicator */}
-              {selected && (
-                <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', position: 'relative', zIndex: 2 }}>
+                <div className="icon-container">
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {check.materialIcon || 'check_circle'}
+                  </span>
                 </div>
-              )}
-
-              <span className="text-3xl">{check.icon}</span>
-              <div>
-                <p className={`text-sm font-semibold ${selected ? 'text-indigo-300' : 'text-[var(--color-text-primary)]'}`}>
-                  {check.label}
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
-                  {check.description}
-                </p>
+                <div>
+                  <h3 style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '20px',
+                    fontWeight: 600,
+                    lineHeight: 1.4,
+                    color: '#dde3e7',
+                    marginBottom: '4px',
+                  }}>
+                    {check.label}
+                  </h3>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '14px',
+                    lineHeight: 1.5,
+                    color: '#bbc9cf',
+                  }}>
+                    {check.description}
+                  </p>
+                </div>
               </div>
-            </button>
+            </label>
           )
         })}
-      </div>
-
-      <div className="mt-8"style={{ marginTop: '50px', marginBottom: '20px' }}>
-        <Button
-          id="generate-pipeline-btn"
-          onClick={() => onGenerate(selectedChecks)}
-          loading={loading}
-          disabled={loading || selectedChecks.length === 0}
-          className="w-full max-w-md mx-auto"
-          size="lg"
-        >
-          {loading ? 'Generating...' : 'Generate pipeline →'}
-        </Button>
-
-        {selectedChecks.length === 0 && (
-          <p className="mt-3 text-center text-xs text-amber-400">
-            Please select at least one check to generate a pipeline.
-          </p>
-        )}
       </div>
     </div>
   )

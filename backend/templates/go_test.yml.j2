@@ -1,0 +1,63 @@
+---
+name: Go Tests
+
+on:
+{% if branch_trigger == "push" %}
+  push:
+    branches: [main, develop]
+{% elif branch_trigger == "pull_request" %}
+  pull_request:
+    branches: [main]
+{% else %}
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+{% endif %}
+
+jobs:
+  test:
+{% if matrix and (matrix.os | length > 1 or matrix.versions | length > 1) %}
+    strategy:
+      fail-fast: {{ matrix.fail_fast | lower }}
+      matrix:
+        os: {{ matrix.os | tojson }}
+{% if matrix.versions | length > 0 %}
+        go-version: {{ matrix.versions | tojson }}
+{% endif %}
+    runs-on: ${{ "{{" }} matrix.os {{ "}}" }}
+{% else %}
+    runs-on: ubuntu-latest
+{% endif %}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+{% if matrix and matrix.versions | length > 1 %}
+      - name: Set up Go ${{ "{{" }} matrix.go-version {{ "}}" }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ "{{" }} matrix.go-version {{ "}}" }}
+{% else %}
+      - name: Set up Go {{ version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: '{{ version }}'
+{% endif %}
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: {{ test_command }}
+{% if enable_deploy_sim %}
+
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Simulate deployment
+        run: echo "Deploying application..."
+{% endif %}
