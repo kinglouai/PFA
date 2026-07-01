@@ -89,9 +89,14 @@ def get_latest_run_id_for_branch(token: str, repo_url: str, branch_name: str) ->
     g = Github(token)
     repo = g.get_repo(f"{owner}/{repo_name}")
     try:
-        runs = repo.get_workflow_runs(branch=branch_name)
-        if runs.totalCount > 0:
-            return runs[0].id
+        runs = repo.get_workflow_runs()
+        count = 0
+        for run in runs:
+            if count >= 10:
+                break
+            if run.head_branch == branch_name:
+                return run.id
+            count += 1
     except Exception:
         pass
     return None

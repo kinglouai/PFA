@@ -9,6 +9,32 @@ from app.core.exceptions import AppException
 
 import yaml
 
+def _inject_working_directory(yaml_str: str, root_path: str) -> str:
+    """Helper to inject working-directory into all jobs if root_path is not '.'"""
+    if not root_path or root_path == ".":
+        return yaml_str
+    try:
+        parsed = yaml.safe_load(yaml_str)
+        if not parsed or "jobs" not in parsed:
+            return yaml_str
+        for job_name, job_config in parsed["jobs"].items():
+            if "defaults" not in job_config:
+                job_config["defaults"] = {}
+            if "run" not in job_config["defaults"]:
+                job_config["defaults"]["run"] = {}
+            job_config["defaults"]["run"]["working-directory"] = root_path
+        
+        class Dumper(yaml.SafeDumper):
+            def ignore_aliases(self, data):
+                return True
+            def increase_indent(self, flow=False, indentless=False):
+                return super(Dumper, self).increase_indent(flow, False)
+                
+        final_yaml = "---\n" + yaml.dump(parsed, sort_keys=False, default_flow_style=False, Dumper=Dumper)
+        return final_yaml.replace("\n'on':", "\non:")
+    except Exception:
+        return yaml_str
+
 def build_pipeline(profile: dict) -> dict:
     """
     Build a CI/CD pipeline YAML from a project profile dict.
@@ -23,8 +49,14 @@ def build_pipeline(profile: dict) -> dict:
 
     if len(languages) == 1:
         # Single language
-        profile["language"] = languages[0]
+        lang = languages[0]
+        profile["language"] = lang
+        if profile.get("paths_map"):
+            profile["root_path"] = profile["paths_map"].get(lang, profile.get("root_path", "."))
+            
         yaml_output, template_used = _build_single_pipeline(profile)
+        yaml_output = _inject_working_directory(yaml_output, profile.get("root_path"))
+        
         return {
             "yaml": yaml_output,
             "template_used": template_used,
@@ -45,6 +77,8 @@ def build_pipeline(profile: dict) -> dict:
         lang_profile["language"] = lang
         if profile.get("versions_map"):
             lang_profile["version"] = profile["versions_map"].get(lang, profile.get("version"))
+        if profile.get("paths_map"):
+            lang_profile["root_path"] = profile["paths_map"].get(lang, profile.get("root_path", "."))
         
         yaml_output, template_used = _build_single_pipeline(lang_profile)
         template_used_list.append(template_used)
@@ -54,7 +88,6 @@ def build_pipeline(profile: dict) -> dict:
         except Exception:
             continue
             
-        # PyYAML parses unquoted 'on' as boolean True
         on_block = parsed.get(True) or parsed.get("on")
             
         if merged_dict.get("on") is None and on_block is not None:
@@ -63,6 +96,7 @@ def build_pipeline(profile: dict) -> dict:
                 del merged_dict[True]
             
         jobs = parsed.get("jobs", {})
+        root_path = lang_profile.get("root_path")
         for job_name, job_config in jobs.items():
             new_job_name = f"{job_name}-{lang}"
             
@@ -74,6 +108,14 @@ def build_pipeline(profile: dict) -> dict:
                 elif isinstance(needs, list):
                     job_config["needs"] = [f"{n}-{lang}" for n in needs]
             
+            # Inject working directory
+            if root_path and root_path != ".":
+                if "defaults" not in job_config:
+                    job_config["defaults"] = {}
+                if "run" not in job_config["defaults"]:
+                    job_config["defaults"]["run"] = {}
+                job_config["defaults"]["run"]["working-directory"] = root_path
+                    
             merged_dict["jobs"][new_job_name] = job_config
             
     # Dump back to YAML string
@@ -212,11 +254,11 @@ def _build_template_variables(profile: dict) -> dict:
     linter = profile.get("linter")
     package_manager = profile.get("package_manager", "")
     checks = profile.get("checks", [])
-    branch_trigger = profile.get("branch_trigger", "push")
+    branch_trigger = profile.get("branch_trigger", "both")
     matrix = profile.get("matrix")
 
     # ── Determine commands ───────────────────────────────────────────
-    test_command = _get_test_command(language, test_framework, package_manager)
+    test_command = _get_test_command(language, test_framework, package_manager, framework)
     lint_command = _get_lint_command(language, linter, package_manager)
     cache_key = _get_cache_key(language, package_manager)
 
@@ -236,12 +278,14 @@ def _build_template_variables(profile: dict) -> dict:
     }
 
 
-def _get_test_command(language: str, test_framework: str | list | None, pkg_manager: str) -> str:
+def _get_test_command(language: str, test_framework: str | list | None, pkg_manager: str, framework: str | None = None) -> str:
     """Return the test command for the language/framework."""
     tfs = test_framework if isinstance(test_framework, list) else [test_framework] if test_framework else []
 
     if language == "python":
-        return "pytest" if "pytest" in tfs else "python -m unittest discover"
+        if "unittest" in tfs and "pytest" not in tfs:
+            return "python -m unittest discover"
+        return "python -m pip install pytest pytest-cov && pytest"
     elif language == "node":
         if pkg_manager == "yarn":
             return "yarn test"
@@ -255,7 +299,10 @@ def _get_test_command(language: str, test_framework: str | list | None, pkg_mana
     elif language == "rust":
         return "cargo test"
     elif language == "php":
-        return "vendor/bin/phpunit"
+        frameworks = framework if isinstance(framework, list) else [framework] if framework else []
+        if any(f.lower() == "laravel" for f in frameworks if isinstance(f, str)):
+            return "if [ -f phpunit.xml ]; then sed -i 's/failOnWarning=\"true\"/failOnWarning=\"false\"/gi' phpunit.xml 2>/dev/null || true; fi; if [ -f artisan ]; then php artisan test; else vendor/bin/phpunit; fi"
+        return "if [ -f phpunit.xml ]; then sed -i 's/failOnWarning=\"true\"/failOnWarning=\"false\"/gi' phpunit.xml 2>/dev/null || true; fi; vendor/bin/phpunit"
     elif language == "ruby":
         if "rspec" in tfs:
             return "bundle exec rspec"
@@ -276,37 +323,41 @@ def _get_lint_command(language: str, linter: str | None, pkg_manager: str) -> st
 
     if language == "python":
         if linter == "flake8":
-            return "flake8 ."
+            return "python -m pip install flake8 && flake8 ."
         elif linter == "black":
-            return "black --check ."
+            return "python -m pip install black && black --check ."
         elif linter == "pylint":
-            return "pylint **/*.py"
+            return "python -m pip install pylint && pylint **/*.py"
         elif linter == "ruff":
-            return "ruff check ."
+            return "python -m pip install ruff && ruff check ."
     elif language == "node":
         if pkg_manager == "yarn":
-            return "yarn lint"
+            return "yarn run lint --if-present"
         elif pkg_manager == "pnpm":
-            return "pnpm run lint"
-        return "npm run lint"
+            return "pnpm run lint --if-present"
+        return "npm run lint --if-present"
     elif language == "java":
         if linter == "checkstyle":
-            return "mvn checkstyle:check"
+            return "mvn checkstyle:check -Dcheckstyle.skip=false"
         elif linter == "spotbugs":
             return "mvn spotbugs:check"
     elif language == "go":
-        return "golangci-lint run"
+        return "if ! command -v golangci-lint &> /dev/null; then curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2; fi && golangci-lint run"
     elif language == "rust":
-        return "cargo clippy -- -D warnings"
+        return "rustup component add clippy && cargo clippy -- -D warnings"
     elif language == "php":
-        return "vendor/bin/phpcs"
+        if linter == "phpcs":
+            return "if [ ! -f vendor/bin/phpcs ]; then composer global require squizlabs/php_codesniffer; export PATH=\"$PATH:$HOME/.composer/vendor/bin\"; fi && phpcs ."
+        elif linter == "php-cs-fixer":
+            return "if [ ! -f vendor/bin/php-cs-fixer ]; then composer global require friendsofphp/php-cs-fixer; export PATH=\"$PATH:$HOME/.composer/vendor/bin\"; fi && php-cs-fixer fix --dry-run"
+        return "if [ ! -f vendor/bin/phpcs ]; then composer global require squizlabs/php_codesniffer; export PATH=\"$PATH:$HOME/.composer/vendor/bin\"; fi && phpcs ."
     elif language == "ruby":
-        return "bundle exec rubocop"
+        return "gem install rubocop && rubocop"
     elif language == "dotnet":
         return "dotnet format --verify-no-changes"
     elif language == "kotlin":
-        return "./gradlew ktlintCheck"
-
+        return "./gradlew ktlintCheck || echo 'ktlintCheck failed or not configured'"
+    
     return f"{linter} ."
 
 

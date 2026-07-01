@@ -4,7 +4,7 @@ POST /api/v1/detect — Detect the tech stack of a GitHub repository.
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, HttpUrl
-from typing import Optional
+from typing import Optional, List, Union
 
 from app.core.exceptions import AppException
 from app.api.deps import get_optional_token
@@ -20,13 +20,15 @@ class DetectRequest(BaseModel):
 
 class DetectedStack(BaseModel):
     """Detected technology stack of a repository."""
-    language: Optional[str] = None
+    language: Optional[Union[str, List[str]]] = None
     version: Optional[str] = None
-    framework: Optional[str] = None
-    test_framework: Optional[str] = None
-    linter: Optional[str] = None
+    framework: Optional[Union[str, List[str]]] = None
+    test_framework: Optional[Union[str, List[str]]] = None
+    linter: Optional[Union[str, List[str]]] = None
     has_docker: bool = False
     package_manager: Optional[str] = None
+    versions_map: Optional[dict] = None
+    paths_map: Optional[dict] = None
 
 
 @router.post("/detect")

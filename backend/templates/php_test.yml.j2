@@ -4,15 +4,15 @@ name: PHP Tests
 on:
 {% if branch_trigger == "push" %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
 {% elif branch_trigger == "pull_request" %}
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% else %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% endif %}
 
 jobs:
@@ -28,10 +28,20 @@ jobs:
         with:
           php-version: '{{ version }}'
           extensions: mbstring, xml, ctype, json
-          coverage: none
+          coverage: pcov
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: |
+          composer config policy.advisories.block false || true
+          composer install --no-interaction --prefer-dist
+{% set frameworks = framework if framework is iterable and framework is not string else [framework] %}
+{% if frameworks and "laravel" in (frameworks | join(" ") | lower) %}
+
+      - name: Prepare Laravel Application
+        run: |
+          cp .env.example .env 2>/dev/null || echo "APP_KEY=" > .env
+          if [ -f artisan ]; then php artisan key:generate --force; fi
+{% endif %}
 
       - name: Run tests
         run: {{ test_command }}

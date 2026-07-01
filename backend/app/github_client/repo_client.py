@@ -103,7 +103,7 @@ def create_pr(
             pulls = repo.get_pulls(
                 state="open", head=f"{owner}:{branch_name}", base=default_branch
             )
-            pr = pulls[0] if pulls.totalCount > 0 else None
+            pr = next(iter(pulls), None)
             if not pr:
                 raise
         else:
@@ -158,9 +158,16 @@ def _get_latest_run_id(repo, branch_name: str, max_retries: int = 3) -> int | No
     """
     for attempt in range(max_retries):
         try:
-            runs = repo.get_workflow_runs(branch=branch_name)
-            if runs.totalCount > 0:
-                return runs[0].id
+            # Fetch recent runs and manually filter by head_branch.
+            # GitHub's API `branch=` filter often fails to match `pull_request` events.
+            runs = repo.get_workflow_runs()
+            count = 0
+            for run in runs:
+                if count >= 10:
+                    break
+                if run.head_branch == branch_name:
+                    return run.id
+                count += 1
         except GithubException:
             pass
 

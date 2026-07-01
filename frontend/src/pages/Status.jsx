@@ -70,7 +70,7 @@ function buildLogLines(jobs) {
 export default function Status() {
   const { state, dispatch } = useWizard()
   const navigate = useNavigate()
-  const { status, loading, error } = usePollStatus(state.runId, state.repoUrl)
+  const { status, loading, error, timedOut } = usePollStatus(state.runId, state.repoUrl)
 
   // ── No active run found ──────────────────────────────────────────
   if (!state.runId && !state.prUrl) {
@@ -287,23 +287,67 @@ export default function Status() {
               )}
             </div>
           ) : !status ? (
-            /* Loading / waiting for run */
+            /* Loading / waiting for run — or timed out */
             <div className="glass-panel" style={{
               borderRadius: '12px', padding: '48px', textAlign: 'center',
             }}>
-              <Spinner size="lg" className="mb-6" />
-              <p style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '16px',
-                color: '#bbc9cf', fontWeight: 500, marginBottom: '8px', marginTop: '24px',
-              }}>
-                {loading ? 'Connecting to GitHub…' : 'Waiting for GitHub Actions to trigger…'}
-              </p>
-              <p style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '14px',
-                color: '#859399', maxWidth: '384px', margin: '0 auto', lineHeight: 1.5,
-              }}>
-                GitHub takes a few seconds to register and start the workflow run after opening a Pull Request. We are checking for updates...
-              </p>
+              {timedOut ? (
+                /* Timed out — workflow didn't start */
+                <>
+                  <div style={{
+                    width: '56px', height: '56px', borderRadius: '9999px',
+                    backgroundColor: 'rgba(255, 178, 41, 0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 20px',
+                  }}>
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: '28px', color: '#ffb229',
+                    }}>schedule</span>
+                  </div>
+                  <h3 style={{
+                    fontFamily: 'Geist, Inter, sans-serif', fontSize: '20px',
+                    fontWeight: 600, color: '#ffb229', marginBottom: '12px',
+                  }}>
+                    No Workflow Run Detected
+                  </h3>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                    color: '#bbc9cf', marginBottom: '16px', maxWidth: '480px',
+                    margin: '0 auto 16px', lineHeight: 1.6,
+                  }}>
+                    The Pull Request was created successfully, but GitHub Actions did not start a workflow run within 60 seconds.
+                    This usually means the workflow triggers on <span style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: '13px',
+                      color: '#00d2ff',
+                    }}>push to main</span> — the pipeline will run automatically once you <strong>merge the PR</strong>.
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '12px',
+                    color: '#859399', fontStyle: 'italic', lineHeight: 1.5,
+                    maxWidth: '480px', margin: '0 auto',
+                  }}>
+                    You can view and merge the Pull Request on GitHub using the button below. After merging, come back and
+                    check the Actions tab on your repository to see the pipeline results.
+                  </p>
+                </>
+              ) : (
+                /* Still waiting */
+                <>
+                  <Spinner size="lg" className="mb-6" />
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '16px',
+                    color: '#bbc9cf', fontWeight: 500, marginBottom: '8px', marginTop: '24px',
+                  }}>
+                    {loading ? 'Connecting to GitHub…' : 'Waiting for GitHub Actions to trigger…'}
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: '14px',
+                    color: '#859399', maxWidth: '384px', margin: '0 auto', lineHeight: 1.5,
+                  }}>
+                    GitHub takes a few seconds to register and start the workflow run after opening a Pull Request. We are checking for updates...
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             /* Status with jobs */

@@ -18,13 +18,14 @@ class GenerateRequest(BaseModel):
     language: Union[str, List[str]]
     version: Optional[str] = None
     versions_map: Optional[Dict[str, str]] = None
+    paths_map: Optional[Dict[str, str]] = None
     framework: Optional[Union[str, List[str]]] = None
     test_framework: Optional[Union[str, List[str]]] = None
     linter: Optional[str] = None
     has_docker: bool = False
     package_manager: Optional[str] = None
     checks: List[str] = []
-    branch_trigger: str = "push"
+    branch_trigger: str = "both"
     root_path: Optional[str] = None
     matrix: Optional[MatrixConfig] = None
 

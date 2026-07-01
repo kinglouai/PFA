@@ -4,15 +4,15 @@ name: Java Maven Tests
 on:
 {% if branch_trigger == "push" %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
 {% elif branch_trigger == "pull_request" %}
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% else %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% endif %}
 
 jobs:

@@ -81,11 +81,11 @@ def parse_node_project(
         result["version"] = "18"
 
     # ── Detect package manager ───────────────────────────────────────
-    if "yarn.lock" in file_tree:
+    if any(f == "yarn.lock" or f.endswith("/yarn.lock") for f in file_tree):
         result["package_manager"] = "yarn"
-    elif "pnpm-lock.yaml" in file_tree:
+    elif any(f == "pnpm-lock.yaml" or f.endswith("/pnpm-lock.yaml") for f in file_tree):
         result["package_manager"] = "pnpm"
-    elif "package-lock.json" in file_tree:
+    elif any(f == "package-lock.json" or f.endswith("/package-lock.json") for f in file_tree):
         result["package_manager"] = "npm"
 
     # ── Docker check ─────────────────────────────────────────────────

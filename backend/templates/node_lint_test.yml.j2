@@ -4,15 +4,15 @@ name: Node.js Lint & Tests
 on:
 {% if branch_trigger == "push" %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
 {% elif branch_trigger == "pull_request" %}
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% else %}
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 {% endif %}
 
 jobs:
@@ -32,12 +32,12 @@ jobs:
       - name: Install dependencies
         run: |
 {% if package_manager == "yarn" %}
-          yarn install --frozen-lockfile
+          if [ -f yarn.lock ]; then yarn install --frozen-lockfile; else yarn install; fi
 {% elif package_manager == "pnpm" %}
           npm install -g pnpm
-          pnpm install --frozen-lockfile
+          if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; else pnpm install; fi
 {% else %}
-          npm ci
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
 {% endif %}
 
       - name: Run linter

@@ -38,8 +38,11 @@ function getFieldOptions(fieldKey, currentLanguage) {
 export default function StackSummary({ stack, onConfirm, onBack }) {
   const [editableStack, setEditableStack] = useState(() => {
     const langs = Array.isArray(stack.language) ? stack.language : stack.language ? [stack.language] : []
-    const versions = {}
-    langs.forEach((lang) => { versions[lang] = stack.version || '' })
+    // Use versions_map from the backend if available, otherwise fallback to building from single version
+    const versions = stack.versions_map ? { ...stack.versions_map } : {}
+    if (Object.keys(versions).length === 0) {
+      langs.forEach((lang) => { versions[lang] = stack.version || '' })
+    }
     return { ...stack, _versions: versions }
   })
   const [editingField, setEditingField] = useState(null)
